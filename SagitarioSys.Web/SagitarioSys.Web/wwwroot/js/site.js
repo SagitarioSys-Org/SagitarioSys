@@ -41,97 +41,67 @@ function sairSistema() {
 // ==========================================
 // RENDERIZAÇÃO DINÂMICA DO MENU (MULTI-TENANT)
 // ==========================================
-function renderizarMenuDinamico(tipoNegocio) {
+// ==========================================
+// RENDERIZAÇÃO DINÂMICA DO MENU (VIA BANCO DE DADOS)
+// ==========================================
+function renderizarMenuDinamico(nomeSegmento) {
     const $menuContainer = $("#menuDinamico");
 
-    // Converte para minúsculo para facilitar a comparação
-    const tipo = tipoNegocio ? tipoNegocio.toLowerCase() : "";
-    let menuHtml = "";
+    // Mostra um loading rápido
+    $menuContainer.append('<li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-spinner fa-spin nav-icon"></i><p>Carregando menus...</p></a></li>');
 
-    // 🛠️ MENUS DA OFICINA MECÂNICA
-    if (tipo === "oficina") {
-        menuHtml += `
-            <li class="nav-header">OFICINA MECÂNICA</li>
-            <li class="nav-item">
-                <a href="/Clientes/Index" class="nav-link">
-                    <i class="nav-icon fas fa-users"></i>
-                    <p>Clientes</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="/Veiculos/Index" class="nav-link">
-                    <i class="nav-icon fas fa-car"></i>
-                    <p>Veículos</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="/Estoque/Index" class="nav-link">
-                    <i class="nav-icon fas fa-boxes"></i>
-                    <p>Estoque & Peças</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="/OS/Index" class="nav-link">
-                    <i class="nav-icon fas fa-clipboard-list"></i>
-                    <p>Ordens de Serviço <span class="badge badge-info right">Novo</span></p>
-                </a>
-            </li>
-            <li class="nav-header">FINANCEIRO</li>
-            <li class="nav-item">
-                <a href="/Financeiro/LucroReal" class="nav-link">
-                    <i class="nav-icon fas fa-chart-line"></i>
-                    <p>Lucro Real</p>
-                </a>
-            </li>
-        `;
-    }
-    // 🍦 MENUS DA SORVETERIA (Exemplo futuro)
-    else if (tipo === "sorveteria") {
-        menuHtml += `
-            <li class="nav-header">FRENTE DE CAIXA</li>
-            <li class="nav-item">
-                <a href="/PDV/Index" class="nav-link">
-                    <i class="nav-icon fas fa-cash-register"></i>
-                    <p>Ponto de Venda (PDV)</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="/Produtos/Index" class="nav-link">
-                    <i class="nav-icon fas fa-ice-cream"></i>
-                    <p>Sabores e Produtos</p>
-                </a>
-            </li>
-        `;
-    }
-    // 🩺 MENUS DO CONSULTÓRIO (Exemplo futuro)
-    else if (tipo === "consultorio") {
-        menuHtml += `
-            <li class="nav-header">ATENDIMENTO</li>
-            <li class="nav-item">
-                <a href="/Agenda/Index" class="nav-link">
-                    <i class="nav-icon fas fa-calendar-alt"></i>
-                    <p>Agenda</p>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="/Pacientes/Index" class="nav-link">
-                    <i class="nav-icon fas fa-user-injured"></i>
-                    <p>Pacientes</p>
-                </a>
-            </li>
-        `;
-    }
+    // Se não tiver segmento, não carrega (segurança extra)
+    if (!nomeSegmento) return;
 
-    // Injeta o HTML gerado dentro da Sidebar
-    $menuContainer.append(menuHtml);
+    // Faz a requisição para a nossa API buscar os botões
+    $.ajax({
+        // IMPORTANTE: Envia o nome do segmento na URL para a API filtrar
+        url: `https://localhost:44373/api/Menus/meus-menus?segmento=${encodeURIComponent(nomeSegmento)}`,
+        type: "GET",
+        headers: {
+            "Authorization": "Bearer " + localStorage.getItem("jwt_token")
+        },
+        success: function (menus) {
+            // Limpa o loading e o botão de Dashboard padrão (vamos recriar)
+            $menuContainer.empty();
 
-    // Lógica para marcar o menu atual como "Ativo" (azulzinho)
+            // 1. Dashboard Fixo (Sempre o primeiro)
+            let menuHtml = `
+                <li class="nav-item">
+                    <a href="/Home/Index" class="nav-link">
+                        <i class="nav-icon fas fa-tachometer-alt"></i>
+                        <p>Dashboard</p>
+                    </a>
+                </li>
+                <li class="nav-header">${nomeSegmento.toUpperCase()}</li>
+            `;
+
+            // 2. Itera sobre os menus que vieram do PostgreSQL
+            menus.forEach(function (menu) {
+                menuHtml += `
+                    <li class="nav-item">
+                        <a href="${menu.rota}" class="nav-link">
+                            <i class="nav-icon ${menu.icone}"></i>
+                            <p>${menu.titulo}</p>
+                        </a>
+                    </li>
+                `;
+            });
+
+            $menuContainer.append(menuHtml);
+            marcarMenuAtivo($menuContainer);
+        },
+        error: function () {
+            $menuContainer.html('<li class="nav-item"><a href="#" class="nav-link text-danger"><i class="fas fa-exclamation-triangle nav-icon"></i><p>Erro nos menus</p></a></li>');
+        }
+    });
+}
+
+function marcarMenuAtivo($menuContainer) {
     const currentPath = window.location.pathname.toLowerCase();
     $menuContainer.find('.nav-link').each(function () {
         if ($(this).attr('href').toLowerCase() === currentPath) {
-            // Remove o active do Dashboard (que vem por padrão)
             $menuContainer.find('.nav-link').removeClass('active');
-            // Adiciona o active no menu atual
             $(this).addClass('active');
         }
     });
