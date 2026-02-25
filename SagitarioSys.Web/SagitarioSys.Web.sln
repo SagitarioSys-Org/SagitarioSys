@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SagitarioSys.Web", "SagitarioSys.Web\SagitarioSys.Web.csproj", "{5C24CAB6-DB28-47A4-BAB5-EF6693A8B951}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5C24CAB6-DB28-47A4-BAB5-EF6693A8B951}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C24CAB6-DB28-47A4-BAB5-EF6693A8B951}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C24CAB6-DB28-47A4-BAB5-EF6693A8B951}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C24CAB6-DB28-47A4-BAB5-EF6693A8B951}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D6CF2419-3939-4521-956D-8E6F44CAA0D4}
+	EndGlobalSection
+EndGlobal

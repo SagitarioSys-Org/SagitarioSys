@@ -1,0 +1,125 @@
+﻿/* ==========================================
+   TELA DE LOGIN PROFISSIONAL - SAGITARIO SYS
+   ========================================== */
+
+/* Fundo da página com a imagem e uma camada escura por cima */
+body.login-page {
+    /* A imagem de fundo com um gradiente escuro para melhorar a leitura */
+    background: linear-gradient(rgba(10, 10, 30, 0.6), rgba(10, 10, 30, 0.8)), url('../img/bg-login.jpg') no-repeat center center fixed;
+    background-size: cover; /* Cobre toda a tela */
+    height: 100vh; /* Altura total */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+
+/* A caixa de login */
+.login-box {
+    width: 400px; /* Um pouco mais larga */
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); /* Sombra suave */
+    border-radius: 15px; /* Bordas arredondadas */
+}
+
+    /* O card com efeito de vidro (Glassmorphism) */
+    .login-box .card {
+        background: rgba(25, 30, 50, 0.75); /* Fundo azul escuro semi-transparente */
+        backdrop-filter: blur(15px); /* Efeito de desfoque no fundo */
+        -webkit-backdrop-filter: blur(15px); /* Para compatibilidade com Safari */
+        border: 1px solid rgba(255, 255, 255, 0.1); /* Borda sutil e transparente */
+        border-radius: 15px;
+        color: #fff; /* Texto branco */
+    }
+
+/* Remove a borda azul padrão do AdminLTE */
+.card-primary.card-outline {
+    border-top: none !important;
+}
+
+/* Cabeçalho do card (Logo e Título) */
+.login-box .card-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 25px 0 15px;
+}
+
+    /* Título "SagitarioSys" */
+    .login-box .card-header .h1 {
+        color: #fff;
+        font-weight: 300;
+        letter-spacing: 1px;
+    }
+
+        .login-box .card-header .h1 b {
+            font-weight: 700;
+            color: #4facfe; /* Cor de destaque (azul vibrante) */
+        }
+
+/* Ícone do Sagitário (Arco) */
+.brand-icon-login {
+    font-size: 2.5rem;
+    color: #4facfe;
+    margin-bottom: 10px;
+    display: inline-block;
+}
+
+/* Mensagem "Faça login..." */
+.login-box-msg {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 400;
+}
+
+/* Campos de texto (Inputs) */
+.login-box .form-control {
+    background: rgba(255, 255, 255, 0.1); /* Fundo transparente */
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff; /* Texto digitado branco */
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+    /* Cor do placeholder (texto de dica) */
+    .login-box .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+/* Ícones dentro dos inputs */
+.login-box .input-group-text {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-left: none;
+    color: #4facfe; /* Cor do ícone */
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+/* Efeito ao clicar no input */
+.login-box .form-control:focus {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: none;
+    border-color: #4facfe;
+}
+
+    .login-box .form-control:focus + .input-group-append .input-group-text {
+        border-color: #4facfe;
+        color: #fff;
+    }
+
+/* Botão de Entrar */
+.login-box .btn-primary {
+    /* Gradiente moderno */
+    background: linear-gradient(45deg, #007bff, #4facfe);
+    border: none;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 30px; /* Botão arredondado */
+    box-shadow: 0 5px 15px rgba(0, 123, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+    /* Efeito hover no botão */
+    .login-box .btn-primary:hover {
+        background: linear-gradient(45deg, #0069d9, #007bff);
+        box-shadow: 0 8px 20px rgba(0, 123, 255, 0.6);
+        transform: translateY(-2px); /* Efeito de levantar */
+    }
