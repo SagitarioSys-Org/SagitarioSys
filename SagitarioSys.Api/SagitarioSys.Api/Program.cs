@@ -20,6 +20,11 @@ builder.Services.AddCors(options =>
 // 1. Configurar a Injeção de Dependência da nossa conexão com o banco
 builder.Services.AddSingleton<IDbConnectionFactory, PgSqlConnectionFactory>();
 builder.Services.AddScoped<AuthRepository>();
+builder.Services.AddScoped<ClienteRepository>();
+builder.Services.AddScoped<AssinanteRepository>();
+builder.Services.AddScoped<SegmentoRepository>();
+builder.Services.AddScoped<MenuRepository>();
+builder.Services.AddScoped<VeiculoRepository>();
 
 // 2. Adicionar os Controllers
 builder.Services.AddControllers();
