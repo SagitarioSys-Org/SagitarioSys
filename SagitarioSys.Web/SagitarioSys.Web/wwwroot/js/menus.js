@@ -17,6 +17,10 @@ $(document).ready(function () {
         e.preventDefault();
         salvar();
     });
+
+    $("#ddlSegmento").on("change", function () {
+        atualizarComboMenuPai($(this).val(), $("#txtId").val());
+    });
 });
 
 $.ajaxSetup({
@@ -43,41 +47,44 @@ function carregarListasAuxiliares() {
     });
 }
 
+// Substitua sua função carregarMenus por esta:
+var todosOsMenus = []; // Variável global para guardar a lista
+
 function carregarMenus() {
     $.ajax({
         url: API_MENUS,
         type: "GET",
         success: function (dados) {
+            todosOsMenus = dados; // Guarda para usarmos no modal
             var html = "";
-            var segmentoAtual = ""; // Variável para rastrear a quebra de grupo
+            var segmentoAtual = "";
 
             if (dados.length === 0) {
                 html = '<tr><td colspan="6" class="text-center py-4">Nenhum menu cadastrado.</td></tr>';
             } else {
                 dados.forEach(function (m) {
-
-                    // MÁGICA DO AGRUPAMENTO: Se o segmento mudou, cria uma linha divisória de destaque!
                     if (m.nomeSegmento !== segmentoAtual) {
                         html += `
                             <tr style="background-color: #e9ecef;">
-                                <td colspan="6" class="text-left font-weight-bold text-uppercase text-primary py-2" style="border-top: 2px solid #dee2e6; font-size: 1.05em;">
+                                <td colspan="6" class="text-left font-weight-bold text-uppercase text-primary py-2" style="border-top: 2px solid #dee2e6;">
                                     <i class="fas fa-folder-open mr-2"></i> Segmento: ${m.nomeSegmento}
                                 </td>
                             </tr>
                         `;
-                        segmentoAtual = m.nomeSegmento; // Atualiza o rastreador
+                        segmentoAtual = m.nomeSegmento;
                     }
 
-                    // Monta o visual se for um menu VIP
-                    var vip = m.empresaId
-                        ? `<span class="badge badge-warning"><i class="fas fa-crown mr-1"></i> ${m.nomeEmpresa}</span>`
-                        : '<span class="text-muted">Global</span>';
+                    var vip = m.empresaId ? `<span class="badge badge-warning"><i class="fas fa-crown"></i> ${m.nomeEmpresa}</span>` : '<span class="text-muted">Global</span>';
 
-                    // Linha normal do Menu (agora com um recuo visual - pl-4 - no título)
+                    // Se for filho, adiciona um visual de "Sub-item"
+                    var tituloVisual = m.menuPaiId
+                        ? `<span class="text-muted mr-1">↳</span> ${m.titulo} <small class="text-info">(de ${m.nomeMenuPai})</small>`
+                        : `<span class="font-weight-bold">${m.titulo}</span>`;
+
                     html += `
                         <tr>
                             <td class="text-center align-middle"><i class="${m.icone} fa-lg text-secondary"></i></td>
-                            <td class="font-weight-bold align-middle pl-4">${m.titulo}</td>
+                            <td class="align-middle pl-4">${tituloVisual}</td>
                             <td class="align-middle text-primary"><code>${m.rota}</code></td>
                             <td class="align-middle">${vip}</td>
                             <td class="text-center align-middle font-weight-bold">${m.ordem}</td>
@@ -89,15 +96,21 @@ function carregarMenus() {
                     `;
                 });
             }
-
             $("#tbMenus tbody").html(html);
-        },
-        error: function () {
-            $("#tbMenus tbody").html('<tr><td colspan="6" class="text-center text-danger py-4">Erro ao carregar os menus.</td></tr>');
         }
     });
 }
 
+function atualizarComboMenuPai(segmentoIdSelecionado, idMenuAtual = null) {
+    var html = '<option value="">Nenhum (É um menu principal)</option>';
+
+    // Filtra para mostrar apenas menus do mesmo segmento que NÃO são filhos (evita menu infinito)
+    // E garante que um menu não pode ser pai dele mesmo (idMenuAtual)
+    var menusPrincipais = todosOsMenus.filter(m => m.segmentoId === segmentoIdSelecionado && !m.menuPaiId && m.id !== idMenuAtual);
+
+    menusPrincipais.forEach(m => html += `<option value="${m.id}">${m.titulo}</option>`);
+    $("#ddlMenuPai").html(html);
+}
 function abrirModal() {
     $("#formMenu")[0].reset();
     $("#txtId").val("");
@@ -109,9 +122,8 @@ function abrirModal() {
 function salvar() {
     var id = $("#txtId").val();
     var isEdicao = id !== "";
-
-    // Tratamento crucial: Se o ddlEmpresa estiver vazio, envia NULL para o C#
     var empresaSelecionada = $("#ddlEmpresa").val();
+    var paiSelecionado = $("#ddlMenuPai").val(); // NOVO
 
     var dados = {
         titulo: $("#txtTitulo").val(),
@@ -119,7 +131,8 @@ function salvar() {
         rota: $("#txtRota").val(),
         ordem: parseInt($("#txtOrdem").val()),
         segmentoId: $("#ddlSegmento").val(),
-        empresaId: empresaSelecionada === "" ? null : empresaSelecionada
+        empresaId: empresaSelecionada === "" ? null : empresaSelecionada,
+        menuPaiId: paiSelecionado === "" ? null : paiSelecionado // NOVO
     };
 
     var $btn = $("#btnSalvar");
@@ -149,13 +162,15 @@ function editar(id) {
         $("#txtId").val(m.id);
         $("#txtTitulo").val(m.titulo);
         $("#txtIcone").val(m.icone);
-        $("#iconePreview").attr("class", m.icone); // Atualiza preview
+        $("#iconePreview").attr("class", m.icone);
         $("#txtRota").val(m.rota);
         $("#txtOrdem").val(m.ordem);
         $("#ddlSegmento").val(m.segmentoId);
-
-        // Se for null, seta string vazia para o combo voltar a opção "Não (Global)"
         $("#ddlEmpresa").val(m.empresaId || "");
+
+        // Carrega as opções de pai primeiro, e depois seleciona o valor
+        atualizarComboMenuPai(m.segmentoId, m.id);
+        $("#ddlMenuPai").val(m.menuPaiId || "");
 
         $("#modalTitle").html('<i class="fas fa-edit mr-2"></i> Editar Menu');
         $("#modalMenu").modal("show");
