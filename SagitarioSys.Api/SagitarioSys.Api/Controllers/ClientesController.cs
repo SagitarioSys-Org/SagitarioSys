@@ -2,13 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using SagitarioSys.Api.Models;
 using SagitarioSys.Api.Repositories;
-using System.Security.Claims;
 
 namespace SagitarioSys.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // Bloqueia todo o controller. Só aceita requisições com JWT válido.
+    [Authorize]
     public class ClientesController : ControllerBase
     {
         private readonly ClienteRepository _repository;
@@ -18,7 +17,6 @@ namespace SagitarioSys.Api.Controllers
             _repository = repository;
         }
 
-        // Propriedade privada auxiliar para extrair o EmpresaId do Token JWT de forma limpa
         private Guid EmpresaIdLogada
         {
             get
@@ -31,63 +29,45 @@ namespace SagitarioSys.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var empresaId = EmpresaIdLogada;
-            if (empresaId == Guid.Empty) return Unauthorized("Empresa não identificada no token.");
-
-            var clientes = await _repository.ObterTodosAsync(empresaId);
-            return Ok(clientes);
+            if (EmpresaIdLogada == Guid.Empty) return Unauthorized();
+            return Ok(await _repository.ObterTodosAsync(EmpresaIdLogada));
         }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var empresaId = EmpresaIdLogada;
-            var cliente = await _repository.ObterPorIdAsync(id, empresaId);
-
-            if (cliente == null) return NotFound(new { message = "Cliente não encontrado." });
-
+            var cliente = await _repository.ObterPorIdAsync(id, EmpresaIdLogada);
+            if (cliente == null) return NotFound();
             return Ok(cliente);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Cliente cliente)
         {
-            // Força o vínculo com a empresa do usuário logado (segurança máxima)
             cliente.EmpresaId = EmpresaIdLogada;
-
             if (cliente.EmpresaId == Guid.Empty) return Unauthorized();
 
-            // O Dapper vai retornar o novo ID gerado
-            var novoId = await _repository.CriarAsync(cliente);
-            cliente.Id = novoId;
-
-            // Retorna 201 Created indicando o local onde o recurso pode ser acessado
-            return CreatedAtAction(nameof(GetById), new { id = novoId }, cliente);
+            cliente.Id = await _repository.CriarAsync(cliente);
+            return Ok(cliente);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] Cliente cliente)
         {
-            if (id != cliente.Id) return BadRequest(new { message = "O ID da URL não confere com o ID do corpo." });
-
-            // Força o vínculo para evitar que alterem dados de outra empresa
+            if (id != cliente.Id) return BadRequest();
             cliente.EmpresaId = EmpresaIdLogada;
 
             var sucesso = await _repository.AtualizarAsync(cliente);
-            if (!sucesso) return NotFound(new { message = "Cliente não encontrado ou não pertence a esta empresa." });
-
-            return NoContent(); // 204 Sucesso, mas sem corpo de resposta (padrão REST)
+            if (!sucesso) return NotFound();
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var empresaId = EmpresaIdLogada;
-
-            var sucesso = await _repository.DeletarAsync(id, empresaId);
-            if (!sucesso) return NotFound(new { message = "Cliente não encontrado." });
-
-            return Ok(new { message = "Cliente inativado com sucesso." });
+            var sucesso = await _repository.DeletarAsync(id, EmpresaIdLogada);
+            if (!sucesso) return NotFound();
+            return Ok();
         }
     }
 }

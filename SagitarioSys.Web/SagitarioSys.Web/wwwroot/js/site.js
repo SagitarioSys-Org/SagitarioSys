@@ -37,35 +37,23 @@ function sairSistema() {
     window.location.href = "/Home/Login";
 }
 
-// Função placeholder para renderizar menus (vamos implementar em breve)
+
 // ==========================================
 // RENDERIZAÇÃO DINÂMICA DO MENU (MULTI-TENANT)
 // ==========================================
-// ==========================================
-// RENDERIZAÇÃO DINÂMICA DO MENU (VIA BANCO DE DADOS)
-// ==========================================
 function renderizarMenuDinamico(nomeSegmento) {
     const $menuContainer = $("#menuDinamico");
-
-    // Mostra um loading rápido
     $menuContainer.append('<li class="nav-item"><a href="#" class="nav-link"><i class="fas fa-spinner fa-spin nav-icon"></i><p>Carregando menus...</p></a></li>');
 
-    // Se não tiver segmento, não carrega (segurança extra)
     if (!nomeSegmento) return;
 
-    // Faz a requisição para a nossa API buscar os botões
     $.ajax({
-        // IMPORTANTE: Envia o nome do segmento na URL para a API filtrar
         url: `https://localhost:44373/api/Menus/meus-menus?segmento=${encodeURIComponent(nomeSegmento)}`,
         type: "GET",
-        headers: {
-            "Authorization": "Bearer " + localStorage.getItem("jwt_token")
-        },
+        headers: { "Authorization": "Bearer " + localStorage.getItem("jwt_token") },
         success: function (menus) {
-            // Limpa o loading e o botão de Dashboard padrão (vamos recriar)
             $menuContainer.empty();
 
-            // 1. Dashboard Fixo (Sempre o primeiro)
             let menuHtml = `
                 <li class="nav-item">
                     <a href="/Home/Index" class="nav-link">
@@ -76,16 +64,54 @@ function renderizarMenuDinamico(nomeSegmento) {
                 <li class="nav-header">${nomeSegmento.toUpperCase()}</li>
             `;
 
-            // 2. Itera sobre os menus que vieram do PostgreSQL
-            menus.forEach(function (menu) {
-                menuHtml += `
-                    <li class="nav-item">
-                        <a href="${menu.rota}" class="nav-link">
-                            <i class="nav-icon ${menu.icone}"></i>
-                            <p>${menu.titulo}</p>
-                        </a>
-                    </li>
-                `;
+            // SEPARA OS MENUS EM DUAS LISTAS: PAIS e FILHOS
+            const menusPrincipais = menus.filter(m => !m.menuPaiId);
+            const menusFilhos = menus.filter(m => m.menuPaiId);
+
+            menusPrincipais.forEach(function (pai) {
+                // Procura os filhos deste pai específico
+                const filhosDestePai = menusFilhos.filter(f => f.menuPaiId === pai.id);
+
+                if (filhosDestePai.length > 0) {
+                    // É UM MENU "PASTA" (COM SUB-MENUS)
+                    menuHtml += `
+                        <li class="nav-item has-treeview">
+                            <a href="#" class="nav-link">
+                                <i class="nav-icon ${pai.icone}"></i>
+                                <p>
+                                    ${pai.titulo}
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+                            <ul class="nav nav-treeview">
+                    `;
+
+                    filhosDestePai.forEach(function (filho) {
+                        menuHtml += `
+                                <li class="nav-item">
+                                    <a href="${filho.rota}" class="nav-link">
+                                        <i class="nav-icon ${filho.icone} ml-3" style="font-size: 0.8em;"></i>
+                                        <p>${filho.titulo}</p>
+                                    </a>
+                                </li>
+                        `;
+                    });
+
+                    menuHtml += `
+                            </ul>
+                        </li>
+                    `;
+                } else {
+                    // É UM MENU NORMAL (SEM FILHOS)
+                    menuHtml += `
+                        <li class="nav-item">
+                            <a href="${pai.rota}" class="nav-link">
+                                <i class="nav-icon ${pai.icone}"></i>
+                                <p>${pai.titulo}</p>
+                            </a>
+                        </li>
+                    `;
+                }
             });
 
             $menuContainer.append(menuHtml);
@@ -96,6 +122,7 @@ function renderizarMenuDinamico(nomeSegmento) {
         }
     });
 }
+
 
 function marcarMenuAtivo($menuContainer) {
     const currentPath = window.location.pathname.toLowerCase();
