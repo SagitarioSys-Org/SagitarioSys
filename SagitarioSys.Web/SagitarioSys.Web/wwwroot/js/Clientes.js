@@ -81,16 +81,16 @@ function carregarClientes() {
                 var qtdContatos = c.contatos ? c.contatos.length : 0;
 
                 html += `
-                    <tr>
-                        <td class="font-weight-bold align-middle">${c.nome}</td>
-                        <td class="align-middle">${c.cpfCnpj || '-'}</td>
-                        <td class="align-middle">${local}</td>
-                        <td class="align-middle"><span class="badge badge-info">${qtdContatos} contato(s)</span></td>
-                        <td class="text-center align-middle">
-                            <button class="btn btn-sm btn-outline-info mr-1" onclick="editar('${c.id}')"><i class="fas fa-edit"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deletar('${c.id}', '${c.nome}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
+                  <tr style="border-bottom: 1px solid var(--zinc-100);">
+            <td class="pl-4 py-3 font-weight-bold" style="color: var(--zinc-900);">${c.nome}</td>
+            <td class="py-3">${c.cpfCnpj || '-'}</td>
+            <td class="py-3 text-muted">${local}</td>
+            <td class="py-3 text-center"><span class="badge" style="background-color: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0; font-weight: 600;">${qtdContatos} Contato(s)</span></td>
+            <td class="py-3 text-center">
+                <button class="btn btn-sm btn-light border shadow-sm text-primary mr-1" onclick="editar('${c.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-light border shadow-sm text-danger" onclick="deletar('${c.id}', '${c.nome}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
                 `;
             });
             $("#tbClientes tbody").html(html || '<tr><td colspan="5" class="text-center py-4">Nenhum cliente encontrado.</td></tr>');

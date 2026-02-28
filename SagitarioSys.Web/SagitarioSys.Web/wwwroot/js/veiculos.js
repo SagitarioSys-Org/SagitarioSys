@@ -69,7 +69,16 @@ $.ajaxSetup({
 function carregarClientes() {
     $.get(API_CLIENTES, function (dados) {
         var html = '<option value="">Selecione o proprietário...</option>';
-        dados.forEach(c => html += `<option value="${c.id}">${c.nome} (${c.telefone || 'Sem Tel'})</option>`);
+        dados.forEach(c => {
+            // MÁGICA AQUI: O banco agora devolve uma lista de "Contatos" pra cada cliente.
+            // Nós tentamos pegar o primeiro contato disponível (telefone ou email).
+            let contatoPrincipal = "Sem Tel";
+            if (c.contatos && c.contatos.length > 0) {
+                contatoPrincipal = c.contatos[0].contato || c.contatos[0].email || "Sem Tel";
+            }
+
+            html += `<option value="${c.id}">${c.nome} (${contatoPrincipal})</option>`;
+        });
         $("#ddlCliente").html(html);
     });
 }
@@ -90,17 +99,20 @@ function carregarVeiculos() {
             var html = "";
             dados.forEach(function (v) {
                 html += `
-                    <tr>
-                        <td class="font-weight-bold align-middle">
-                            <span class="border rounded p-1 bg-white text-dark">${v.placa.toUpperCase()}</span>
-                        </td>
-                        <td class="align-middle text-primary font-weight-bold">${v.marca} ${v.modelo}</td>
-                        <td class="align-middle">${v.ano} • ${v.cor || 'N/I'}</td>
-                        <td class="align-middle"><i class="fas fa-user-circle mr-1 text-muted"></i> ${v.nomeCliente}</td>
-                        <td class="text-center align-middle">
-                            <button class="btn btn-sm btn-outline-danger" onclick="deletar('${v.id}', '${v.placa}')"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
+                 <tr style="border-bottom: 1px solid var(--zinc-100);">
+            <td class="pl-4 py-3 align-middle">
+                <span class="plate-badge">${v.placa}</span>
+            </td>
+            <td class="py-3 align-middle">
+                <div class="font-weight-bold" style="color: var(--zinc-900);">${v.marca} ${v.modelo}</div>
+            </td>
+            <td class="py-3 text-muted align-middle">${v.anoFabricacao}/${v.anoModelo} <span class="badge bg-light border ml-1">${v.cor}</span></td>
+            <td class="py-3 font-weight-bold text-muted align-middle"><i class="fas fa-user-circle mr-1"></i> ${v.nomeCliente}</td>
+            <td class="py-3 text-center align-middle">
+                <button class="btn btn-sm btn-light border shadow-sm text-primary mr-1" onclick="editar('${v.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-light border shadow-sm text-danger" onclick="deletar('${v.id}', '${v.placa}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
                 `;
             });
             $("#tbVeiculos tbody").html(html || '<tr><td colspan="5" class="text-center py-4">Nenhum veículo encontrado.</td></tr>');
@@ -117,22 +129,44 @@ function abrirModal() {
 }
 
 function salvar() {
+    var id = $("#txtId").val();
+    var isEdicao = id !== "";
+
+    // Como usamos o select da Fipe que mistura nome e código, precisamos extrair apenas os nomes pro banco
+    var textoMarca = $("#ddlMarca option:selected").text();
+    var textoModelo = $("#ddlModelo option:selected").text();
+    var textoAno = $("#ddlAno option:selected").text();
+
+    var anoFab = 0;
+    var anoMod = 0;
+
+    if (textoAno.includes("Gasolina") || textoAno.includes("Diesel") || textoAno.includes("Alcool") || textoAno.includes("Flex")) {
+        var partesAno = textoAno.split(" ");
+        anoFab = parseInt(partesAno[0]);
+        anoMod = parseInt(partesAno[0]);
+    } else {
+        anoFab = 2024; // fallback se falhar a API
+        anoMod = 2024;
+    }
+
     var dados = {
         clienteId: $("#ddlCliente").val(),
-        marca: $("#txtMarcaNome").val(), // Salva o nome amigável e não o ID da FIPE
-        modelo: $("#txtModeloNome").val(),
-        ano: parseInt($("#txtAnoValor").val()),
-        placa: $("#txtPlaca").val().toUpperCase(),
+        placa: $("#txtPlaca").val(),
+        marca: isEdicao && textoMarca === "Selecione a Marca" ? $("#ddlMarca").data("nome-antigo") : textoMarca,
+        modelo: isEdicao && textoModelo === "Selecione a marca primeiro" ? $("#ddlModelo").data("nome-antigo") : textoModelo,
+        anoFabricacao: anoFab,
+        anoModelo: anoMod,
         cor: $("#txtCor").val(),
-        observacoes: $("#txtObs").val()
+        observacoes: $("#txtObs").val(),
+        kmAtual: parseInt($("#txtKm").val()) || 0 // Puxa o KM da tela
     };
 
     var $btn = $("#btnSalvar");
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...');
 
     $.ajax({
-        url: API_VEICULOS,
-        type: "POST",
+        url: isEdicao ? `${API_VEICULOS}/${id}` : API_VEICULOS,
+        type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
         success: function () {
@@ -144,8 +178,34 @@ function salvar() {
             Swal.fire('Erro!', 'Não foi possível salvar.', 'error');
         },
         complete: function () {
-            $btn.prop("disabled", false).html('<i class="fas fa-save mr-1"></i> Salvar Veículo');
+            $btn.prop("disabled", false).html('Salvar Veículo');
         }
+    });
+}
+
+function editar(id) {
+    $.get(`${API_VEICULOS}/${id}`, function (v) {
+        $("#txtId").val(v.id);
+        $("#ddlCliente").val(v.clienteId);
+
+        // Joga a placa e garante o texto em maiúsculo (com a nova classe)
+        $("#txtPlaca").val(v.placa.toUpperCase());
+
+        $("#txtCor").val(v.cor);
+        $("#txtObs").val(v.observacoes);
+        $("#txtKm").val(v.kmAtual);
+
+        $("#ddlMarca").html(`<option value="${v.marca}">${v.marca}</option>`);
+
+        $("#ddlModelo").html(`<option value="${v.modelo}">${v.modelo}</option>`)
+            .prop("disabled", false); // Habilita o campo
+
+        $("#ddlAno").html(`<option value="${v.anoFabricacao} ${v.anoModelo}">${v.anoFabricacao}/${v.anoModelo}</option>`)
+            .prop("disabled", false); // Habilita o campo
+
+
+        $("#modalTitle").html(`<i class="fas fa-car-side mr-2 text-emerald-500"></i> Editar Veículo`);
+        $("#modalVeiculo").modal("show");
     });
 }
 
@@ -171,3 +231,4 @@ function deletar(id, placa) {
         }
     });
 }
+

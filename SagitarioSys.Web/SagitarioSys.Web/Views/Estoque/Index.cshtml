@@ -1,0 +1,127 @@
+﻿@{
+    ViewData["Title"] = "Estoque de Peças";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Estoque</h2>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">Controle inteligente de peças e insumos.</p>
+    </div>
+    <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
+        <i class="fas fa-plus mr-2"></i> Entrada de Peça
+    </button>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="glass-card p-4">
+            <div class="text-muted font-weight-bold mb-1" style="font-size: 0.8rem;">Valor Total em Estoque</div>
+            <h3 class="m-0 font-weight-bold" style="color: var(--zinc-800);" id="cardValorTotal">R$ 0,00</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4">
+            <div class="text-muted font-weight-bold mb-1" style="font-size: 0.8rem;">Itens com Estoque Baixo</div>
+            <h3 class="m-0 font-weight-bold text-warning" id="cardEstoqueBaixo">0</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4">
+            <div class="text-muted font-weight-bold mb-1" style="font-size: 0.8rem;">Total de Itens</div>
+            <h3 class="m-0 font-weight-bold" style="color: var(--zinc-800);" id="cardTotalItens">0</h3>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-0 overflow-hidden mb-4">
+    <div class="p-3 border-bottom d-flex align-items-center bg-white">
+        <i class="fas fa-search text-muted mr-3 pl-2"></i>
+        <input type="text" id="txtBusca" class="form-control border-0 shadow-none p-0" placeholder="Buscar por nome ou SKU..." style="font-size: 0.95rem; background: transparent;">
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover align-middle m-0" id="tbEstoque">
+            <thead style="border-bottom: 2px solid var(--zinc-100);">
+                <tr style="color: var(--zinc-400); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+                    <th class="pl-4 py-3">Peça / SKU</th>
+                    <th class="py-3">Quantidade</th>
+                    <th class="py-3">Custo</th>
+                    <th class="py-3">Venda</th>
+                    <th class="py-3">Margem</th>
+                    <th class="py-3 text-center">Status</th>
+                    <th class="py-3 text-center" width="80"></th>
+                </tr>
+            </thead>
+            <tbody style="color: var(--zinc-800); font-size: 0.9rem;">
+                <tr><td colspan="7" class="text-center py-5"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando estoque...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalPeca" tabindex="-1" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header d-flex justify-content-between align-items-center" style="background-color: var(--zinc-900); color: var(--zinc-50);">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-box-open mr-2 text-emerald-500"></i> Ficha da Peça / Insumo</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+
+            <form id="formPeca">
+                <div class="modal-body bg-white p-4">
+                    <input type="hidden" id="txtId" />
+
+                    <div class="row">
+                        <div class="col-md-8 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Nome da Peça <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtNome" required placeholder="Ex: Correia Dentada">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Código (SKU)</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtSku" placeholder="Ex: 145465">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Fornecedor / Local de Compra</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtFornecedor" placeholder="Ex: Mercado Livre, Distribuidora XYZ...">
+                        </div>
+                    </div>
+
+                    <div class="row mt-2 pt-3 border-top">
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Qtd Atual <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control font-weight-bold text-primary" style="border-radius: 6px;" id="txtQtd" required min="0" step="0.01">
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Estoque Mínimo <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control text-warning font-weight-bold" style="border-radius: 6px;" id="txtQtdMinima" required min="0" step="0.01" value="1">
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Preço de Custo <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" style="border-radius: 6px;" id="txtCusto" required min="0" step="0.01" placeholder="0.00">
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Preço de Venda <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control font-weight-bold text-success" style="border-radius: 6px;" id="txtVenda" required min="0" step="0.01" placeholder="0.00">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: var(--zinc-50); border-top: 1px solid var(--zinc-200);">
+                    <button type="button" class="btn btn-outline-secondary font-weight-bold" data-dismiss="modal" style="border-radius: 6px;">Cancelar</button>
+                    <button type="submit" class="btn text-white font-weight-bold px-4" id="btnSalvar" style="background-color: var(--emerald-500); border-radius: 6px;">
+                        Salvar Peça
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/estoque.js"></script>
+}

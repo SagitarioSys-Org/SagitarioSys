@@ -3,96 +3,110 @@
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="~/css/veiculos.css" />
 
-<div class="card card-outline card-primary elevation-2">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title font-weight-bold"><i class="fas fa-car text-primary mr-2"></i> Frota de Clientes</h3>
-        <button class="btn btn-primary btn-sm ml-auto" onclick="abrirModal()">
-            <i class="fas fa-plus mr-1"></i> Novo Veículo
-        </button>
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Veículos</h2>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">Controle da frota e histórico dos clientes.</p>
+    </div>
+    <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
+        <i class="fas fa-plus mr-2"></i> Novo Veículo
+    </button>
+</div>
+
+<div class="glass-card p-0 overflow-hidden mb-4">
+    <div class="p-3 border-bottom d-flex align-items-center bg-white">
+        <i class="fas fa-search text-muted mr-3 pl-2"></i>
+        <input type="text" id="txtBusca" class="form-control border-0 shadow-none p-0" placeholder="Buscar por placa, modelo ou cliente..." style="font-size: 0.95rem; background: transparent;">
     </div>
 
-    <div class="card-body p-0 table-responsive">
-        <table class="table table-hover table-striped mb-0" id="tbVeiculos">
-            <thead class="bg-light">
-                <tr>
-                    <th>Placa</th>
-                    <th>Veículo</th>
-                    <th>Ano/Cor</th>
-                    <th>Cliente (Dono)</th>
-                    <th width="120" class="text-center">Ações</th>
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover align-middle m-0" id="tbVeiculos">
+            <thead style="border-bottom: 2px solid var(--zinc-100);">
+                <tr style="color: var(--zinc-400); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+                    <th class="pl-4 py-3">Placa</th>
+                    <th class="py-3">Veículo</th>
+                    <th class="py-3">Ano / Cor</th>
+                    <th class="py-3">Cliente (Dono)</th>
+                    <th class="py-3 text-center" width="100">Ações</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr><td colspan="5" class="text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando...</td></tr>
+            <tbody style="color: var(--zinc-800); font-size: 0.9rem;">
+                <tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando veículos...</td></tr>
             </tbody>
         </table>
     </div>
 </div>
 
-<div class="modal fade" id="modalVeiculo" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalVeiculo" tabindex="-1" aria-hidden="true" data-backdrop="static">
     <div class="modal-dialog modal-lg">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="modalTitle"><i class="fas fa-car mr-2"></i> Ficha do Veículo</h5>
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header d-flex justify-content-between align-items-center" style="background-color: var(--zinc-900); color: var(--zinc-50);">
+                <h5 class="modal-title font-weight-bold" id="modalTitle"><i class="fas fa-car mr-2 text-emerald-500"></i> Ficha do Veículo</h5>
                 <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
+
             <form id="formVeiculo">
-                <div class="modal-body bg-light">
+                <div class="modal-body bg-white p-4">
                     <input type="hidden" id="txtId" />
 
                     <div class="row">
                         <div class="col-md-12 form-group">
-                            <label>Proprietário (Cliente) <span class="text-danger">*</span></label>
-                            <select class="form-control shadow-sm" id="ddlCliente" required>
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Proprietário (Cliente) <span class="text-danger">*</span></label>
+                            <select class="form-control" style="border-radius: 6px; border-color: var(--zinc-300);" id="ddlCliente" required>
                                 <option value="">Carregando clientes...</option>
                             </select>
                         </div>
                     </div>
 
-                    <h6 class="text-muted font-weight-bold mt-2 mb-3 border-bottom pb-2">DADOS DO VEÍCULO (INTEGRAÇÃO FIPE)</h6>
                     <div class="row">
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Placa <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control plate-input" id="txtPlaca" required placeholder="ABC1C34" maxlength="8">
+                        </div>
                         <div class="col-md-4 form-group">
-                            <label>Marca <span class="text-danger">*</span></label>
-                            <select class="form-control shadow-sm" id="ddlMarca" required>
-                                <option value="">Carregando marcas...</option>
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Marca <span class="text-danger">*</span></label>
+                            <select class="form-control" style="border-radius: 6px;" id="ddlMarca" required>
+                                <option value="">Selecione a Marca</option>
                             </select>
-                            <input type="hidden" id="txtMarcaNome" />
                         </div>
                         <div class="col-md-5 form-group">
-                            <label>Modelo <span class="text-danger">*</span></label>
-                            <select class="form-control shadow-sm" id="ddlModelo" disabled required>
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Modelo <span class="text-danger">*</span></label>
+                            <select class="form-control" style="border-radius: 6px;" id="ddlModelo" required disabled>
                                 <option value="">Selecione a marca primeiro</option>
                             </select>
-                            <input type="hidden" id="txtModeloNome" />
-                        </div>
-                        <div class="col-md-3 form-group">
-                            <label>Ano <span class="text-danger">*</span></label>
-                            <select class="form-control shadow-sm" id="ddlAno" disabled required>
-                                <option value="">Selecione...</option>
-                            </select>
-                            <input type="hidden" id="txtAnoValor" />
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-4 form-group">
-                            <label>Placa <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control shadow-sm text-uppercase" id="txtPlaca" placeholder="ABC-1234" maxlength="8" required>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Ano / Modelo <span class="text-danger">*</span></label>
+                            <select class="form-control" style="border-radius: 6px;" id="ddlAno" required disabled>
+                                <option value="">Aguardando...</option>
+                            </select>
                         </div>
-                        <div class="col-md-4 form-group">
-                            <label>Cor</label>
-                            <input type="text" class="form-control shadow-sm" id="txtCor" placeholder="Ex: Prata">
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Cor</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtCor" placeholder="Ex: Prata">
                         </div>
-                        <div class="col-md-4 form-group">
-                            <label>Observações</label>
-                            <input type="text" class="form-control shadow-sm" id="txtObs" placeholder="Ex: Arranhão na porta">
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">KM Atual</label>
+                            <input type="number" class="form-control font-weight-bold text-primary" style="border-radius: 6px;" id="txtKm" placeholder="0" min="0">
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Observações</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtObs" placeholder="Ex: Arranhão na porta">
                         </div>
                     </div>
+
                 </div>
-                <div class="modal-footer bg-white">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success" id="btnSalvar"><i class="fas fa-save mr-1"></i> Salvar Veículo</button>
+                <div class="modal-footer" style="background-color: var(--zinc-50); border-top: 1px solid var(--zinc-200);">
+                    <button type="button" class="btn btn-outline-secondary font-weight-bold" data-dismiss="modal" style="border-radius: 6px;">Cancelar</button>
+                    <button type="submit" class="btn text-white font-weight-bold px-4" id="btnSalvar" style="background-color: var(--emerald-500); border-radius: 6px;">
+                        Salvar Veículo
+                    </button>
                 </div>
             </form>
         </div>
