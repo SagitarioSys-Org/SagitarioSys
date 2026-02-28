@@ -4,32 +4,39 @@
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-<div class="card card-outline card-primary elevation-2">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title font-weight-bold"><i class="fas fa-users text-primary mr-2"></i> Carteira de Clientes</h3>
-        <button class="btn btn-primary btn-sm ml-auto" onclick="abrirModal()">
-            <i class="fas fa-plus mr-1"></i> Novo Cliente
-        </button>
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Clientes</h2>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">Gerencie sua base de clientes e contatos.</p>
+    </div>
+    <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
+        <i class="fas fa-plus mr-2"></i> Novo Cliente
+    </button>
+</div>
+
+<div class="glass-card p-0 overflow-hidden mb-4">
+    <div class="p-3 border-bottom d-flex align-items-center bg-white">
+        <i class="fas fa-search text-muted mr-3 pl-2"></i>
+        <input type="text" id="txtBusca" class="form-control border-0 shadow-none p-0" placeholder="Buscar por nome, CPF/CNPJ ou cidade..." style="font-size: 0.95rem; background: transparent;">
     </div>
 
-    <div class="card-body p-0 table-responsive">
-        <table class="table table-hover table-striped mb-0" id="tbClientes">
-            <thead class="bg-light">
-                <tr>
-                    <th>Nome</th>
-                    <th>CPF / CNPJ</th>
-                    <th>Cidade/UF</th>
-                    <th>Contatos Salvos</th>
-                    <th width="120" class="text-center">Ações</th>
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover align-middle m-0" id="tbClientes">
+            <thead style="border-bottom: 2px solid var(--zinc-100);">
+                <tr style="color: var(--zinc-400); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+                    <th class="pl-4 py-3">Nome</th>
+                    <th class="py-3">CPF / CNPJ</th>
+                    <th class="py-3">Cidade/UF</th>
+                    <th class="py-3 text-center">Contatos Salvos</th>
+                    <th class="py-3 text-center" width="100">Ações</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr><td colspan="5" class="text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando...</td></tr>
+            <tbody style="color: var(--zinc-800); font-size: 0.9rem;">
+                <tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando clientes...</td></tr>
             </tbody>
         </table>
     </div>
 </div>
-
 <div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content border-0 shadow-lg">

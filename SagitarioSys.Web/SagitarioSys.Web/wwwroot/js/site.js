@@ -90,7 +90,7 @@ function renderizarMenuDinamico(nomeSegmento) {
                         menuHtml += `
                                 <li class="nav-item">
                                     <a href="${filho.rota}" class="nav-link">
-                                        <i class="nav-icon ${filho.icone} ml-3" style="font-size: 0.8em;"></i>
+                                        <i class="nav-icon ${filho.icone}"></i>
                                         <p>${filho.titulo}</p>
                                     </a>
                                 </li>

@@ -1,16 +1,157 @@
 ﻿$(document).ready(function () {
+    // 1. Inicia os Widgets de Entretenimento e Utilidade
     iniciarRelogio();
     carregarFraseDoDia();
     carregarClimaEInfoLocal();
 
+    // 2. Traz o Nome do Usuário Logado
     var nomeUsuario = localStorage.getItem("usuario_nome");
     if (nomeUsuario) {
         $("#lblNomeUsuario").text(nomeUsuario);
     }
+
+    // 3. Inicia o Cérebro de Gestão da Oficina (O Novo Motor!)
+    carregarDadosDashboardGestao();
+});
+
+$.ajaxSetup({
+    beforeSend: function (xhr) {
+        // Ignora a injeção do token JWT do sistema para APIs públicas de clima/frases
+        if (!this.url.includes("open-meteo") && !this.url.includes("docapi.dev") && !this.url.includes("rss2json") && !this.url.includes("bigdatacloud")) {
+            var token = localStorage.getItem("jwt_token");
+            if (token) xhr.setRequestHeader("Authorization", "Bearer " + token);
+        }
+    }
 });
 
 // ==========================================
-// 1. RELÓGIO E DATA
+// 🚀 BLOCO DE GESTÃO: FINANCEIRO, ESTOQUE E O.S. (NOVO)
+// ==========================================
+function carregarDadosDashboardGestao() {
+    $.when(
+        $.get("https://localhost:44373/api/OrdensServico"),
+        $.get("https://localhost:44373/api/Estoque")
+    ).done(function (osResponse, estoqueResponse) {
+
+        const ordens = osResponse[0];
+        const estoque = estoqueResponse[0];
+
+        processarEstoque(estoque);
+        processarFinanceiroEOs(ordens, estoque);
+
+    }).fail(function () {
+        console.error("Erro ao carregar dados de gestão do dashboard.");
+    });
+}
+
+function processarEstoque(estoque) {
+    let qtdItensBaixo = 0;
+    let htmlLista = "";
+
+    $("#dashTotalPecas").text(estoque.length);
+
+    estoque.forEach(p => {
+        if (p.quantidade <= p.estoqueMinimo) {
+            qtdItensBaixo++;
+            htmlLista += `
+                <div class="p-3 mb-2 rounded" style="background-color: #fffbeb; border: 1px solid #fde68a;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="font-weight-bold" style="color: #b45309; font-size: 0.9rem;">${p.nome}</div>
+                            <div style="color: #d97706; font-size: 0.75rem;">Qtd: ${p.quantidade} / Min: ${p.estoqueMinimo}</div>
+                        </div>
+                        <a href="/Estoque/Index" class="btn btn-sm bg-white font-weight-bold shadow-sm" style="color: #d97706; border: 1px solid #fde68a; font-size: 0.75rem;">Repor</a>
+                    </div>
+                </div>
+            `;
+        }
+    });
+
+    $("#dashAlertasEstoque").text(qtdItensBaixo);
+
+    if (qtdItensBaixo > 0) {
+        $("#listaEstoqueBaixo").html(htmlLista);
+    } else {
+        $("#listaEstoqueBaixo").html('<div class="text-center text-muted mt-4"><i class="fas fa-check-circle text-success mb-2" style="font-size: 2rem;"></i><br>Estoque sob controle!</div>');
+    }
+}
+
+function processarFinanceiroEOs(ordens, estoque) {
+    let osPendentes = 0;
+    let receitaMes = 0;
+    let custoPecasMes = 0;
+    let despesas = 0;
+
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+
+    ordens.forEach(os => {
+        if (os.status !== "Concluida" && os.status !== "Cancelada") {
+            osPendentes++;
+        }
+
+        const dataOS = new Date(os.dataAbertura);
+        if (dataOS.getMonth() === mesAtual && dataOS.getFullYear() === anoAtual) {
+            receitaMes += os.valorTotal;
+
+            if (os.itens) {
+                os.itens.forEach(item => {
+                    if (item.tipo === "Peca" && item.pecaId) {
+                        let pecaEstoque = estoque.find(p => p.id === item.pecaId);
+                        if (pecaEstoque) {
+                            custoPecasMes += (item.quantidade * pecaEstoque.custo);
+                        }
+                    }
+                });
+            }
+        }
+    });
+
+    $("#dashOsPendentes").text(osPendentes);
+
+    let lucroLiquido = receitaMes - custoPecasMes - despesas;
+    $("#dashLucro").text(lucroLiquido.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+
+    desenharGrafico(receitaMes, custoPecasMes, despesas, lucroLiquido);
+}
+
+function desenharGrafico(receita, custo, despesas, lucro) {
+    const ctx = document.getElementById('graficoFinanceiro').getContext('2d');
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Receita', 'Custo Peças', 'Despesas', 'Lucro Líquido'],
+            datasets: [{
+                label: 'Valores em R$',
+                data: [receita, custo, despesas, lucro],
+                backgroundColor: [
+                    '#10b981', '#f59e0b', '#ef4444',
+                    lucro >= 0 ? '#059669' : '#dc2626'
+                ],
+                borderRadius: 6,
+                barPercentage: 0.6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { borderDash: [5, 5], color: '#e4e4e7' },
+                    ticks: { callback: function (value) { return 'R$ ' + value; } }
+                },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+// ==========================================
+// 📰 BLOCO DE WIDGETS: CLIMA E NOTÍCIAS (LEGADO MANTIDO)
 // ==========================================
 function iniciarRelogio() {
     setInterval(function () {
@@ -25,49 +166,36 @@ function iniciarRelogio() {
     }, 1000);
 }
 
-// ==========================================
-// 2. FRASES MOTIVACIONAIS EM PORTUGUÊS (API DocApi.dev)
-// ==========================================
 function carregarFraseDoDia() {
     $("#lblQuote").text("Buscando inspiração...");
     $("#lblQuoteAuthor").text("");
 
-    // Usando a API nativa em Português sugerida por você!
     const urlApi = "https://frases.docapi.dev/frase/obter";
 
     $.ajax({
         url: urlApi,
         type: "GET",
-        // Ignora a injeção do token JWT do seu sistema para essa requisição pública
-        beforeSend: function (xhr) { },
         success: function (data) {
-            // A API retorna um objeto com a propriedade "resposta" contendo um array de frases
             if (data && data.resposta && data.resposta.length > 0) {
-
-                // Sorteia uma frase aleatória do banco de dados deles
                 const indexAleatorio = Math.floor(Math.random() * data.resposta.length);
                 const fraseEscolhida = data.resposta[indexAleatorio];
 
                 $("#lblQuote").text(`"${fraseEscolhida.frase}"`);
 
-                // Previne que o autor venha vazio ou nulo
                 let autor = fraseEscolhida.nomeAutor;
-                if (!autor || autor.trim() === "") {
-                    autor = "Autor Desconhecido";
-                }
+                if (!autor || autor.trim() === "") autor = "Autor Desconhecido";
+
                 $("#lblQuoteAuthor").text(`- ${autor}`);
             } else {
                 chamarFraseFallback();
             }
         },
         error: function () {
-            // Se a API externa cair ou o usuário estiver sem internet, aciona o plano B
             chamarFraseFallback();
         }
     });
 }
 
-// PLANO B: Rede de segurança local para o painel nunca ficar vazio
 function chamarFraseFallback() {
     const frasesFallback = [
         { q: "O sucesso é a soma de pequenos esforços repetidos dia após dia.", a: "Robert Collier" },
@@ -79,9 +207,6 @@ function chamarFraseFallback() {
     $("#lblQuoteAuthor").text(`- ${frasesFallback[index].a}`);
 }
 
-// ==========================================
-// 3. GEOLOCALIZAÇÃO: CLIMA E NOTÍCIAS G1
-// ==========================================
 function carregarClimaEInfoLocal() {
     $("#weatherContent").hide();
     $("#weatherLoading").show();
@@ -93,7 +218,7 @@ function carregarClimaEInfoLocal() {
                 buscarCidadeENoticias(position.coords.latitude, position.coords.longitude);
             },
             function (error) {
-                buscarDadosClima(-23.5505, -46.6333); // Padrão: SP
+                buscarDadosClima(-23.5505, -46.6333);
                 buscarCidadeENoticias(null, null);
             }
         );
@@ -103,7 +228,6 @@ function carregarClimaEInfoLocal() {
     }
 }
 
-// Clima (Mantido o mesmo)
 function buscarDadosClima(lat, lon) {
     const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
 
@@ -136,17 +260,14 @@ function buscarDadosClima(lat, lon) {
     });
 }
 
-// O NOVO HACK DAS NOTÍCIAS DO G1
-// O NOVO MOTOR DUPLO DE NOTÍCIAS
 function buscarCidadeENoticias(lat, lon) {
     if (lat && lon) {
         const urlGeo = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`;
         $.get(urlGeo, function (data) {
-            const cidade = data.city || data.locality || "Brasil";
+            const cidade = data.city || data.locality || "Presidente Prudente";
 
             $("#lblCidadeNoticias").text(cidade);
 
-            // Dispara as duas buscas separadas
             carregarFeedDeNoticias(cidade, "local");
             carregarFeedDeNoticias("esportes", "esportes");
         });
@@ -157,20 +278,16 @@ function buscarCidadeENoticias(lat, lon) {
     }
 }
 
-// Função genérica que busca e desenha o feed na tela
-// Função genérica que busca e desenha o feed na tela
 function carregarFeedDeNoticias(query, tipo) {
     let rssUrl = "";
     let targetDiv = "";
     let corIcone = "";
 
     if (tipo === "local") {
-        // Usa o Google News para pesquisar notícias exatamente sobre a sua cidade
         rssUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt-419`;
         targetDiv = "#boxNoticiasLocais";
         corIcone = "text-info";
     } else if (tipo === "esportes") {
-        // Usa a categoria oficial de Esportes Nacionais do Google News (Agrega GE, UOL, ESPN, etc)
         rssUrl = "https://news.google.com/news/rss/headlines/section/topic/SPORTS?hl=pt-BR&gl=BR&ceid=BR:pt-419";
         targetDiv = "#boxNoticiasEsportes";
         corIcone = "text-success";
@@ -181,13 +298,10 @@ function carregarFeedDeNoticias(query, tipo) {
     $.get(urlRss2Json, function (data) {
         let html = "";
         if (data && data.status === 'ok' && data.items) {
-            // Pegamos as 3 primeiras notícias
             const topNoticias = data.items.slice(0, 3);
 
             topNoticias.forEach(n => {
-                // Limpa o título (Remove o nome do site que o Google anexa no final, ex: " - ge.globo")
                 let tituloLimpo = n.title.split(" - ")[0];
-
                 const dataPublicacao = new Date(n.pubDate.replace(' ', 'T')).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
 
                 html += `

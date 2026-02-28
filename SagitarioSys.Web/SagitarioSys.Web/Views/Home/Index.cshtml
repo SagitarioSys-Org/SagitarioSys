@@ -1,20 +1,84 @@
-﻿@{
-    ViewData["Title"] = "Dashboard";
-}
+﻿<div class="mb-4 mt-2">
+    <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Dashboard</h2>
+    <p class="text-muted m-0" style="font-size: 0.95rem;">Visão geral da sua oficina este mês.</p>
+</div>
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card card-outline card-primary shadow-sm mb-4">
-            <div class="card-body">
-                <h2 class="font-weight-bold text-dark">Olá, <span id="lblNomeUsuario" class="text-primary">Gestor</span>! 👋</h2>
-                <p class="text-muted lead">Bem-vindo ao seu painel de controle. Aqui está o resumo do seu dia.</p>
-                <hr />
-                <div class="d-flex justify-content-between align-items-center flex-wrap">
-                    <h5 class="mb-0 text-secondary"><i class="far fa-calendar-alt text-info mr-2"></i> <span id="lblDataAtual">--/--/----</span></h5>
-                    <h3 class="mb-0 font-weight-bold text-dark"><i class="far fa-clock text-info mr-2"></i> <span id="lblHoraAtual">--:--:--</span></h3>
+<div class="card card-outline card-primary shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="font-weight-bold text-dark">Olá, <span id="lblNomeUsuario" class="text-primary">Gestor</span>! 👋</h2>
+        <p class="text-muted lead">Bem-vindo ao seu painel de controle. Aqui está o resumo do seu dia.</p>
+        <hr />
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <h5 class="mb-0 text-secondary"><i class="far fa-calendar-alt text-info mr-2"></i> <span id="lblDataAtual">--/--/----</span></h5>
+            <h3 class="mb-0 font-weight-bold text-dark"><i class="far fa-clock text-info mr-2"></i> <span id="lblHoraAtual">--:--:--</span></h3>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="glass-card p-4">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-chart-line text-success mr-2"></i>
+                <span class="text-muted font-weight-bold" style="font-size: 0.8rem;">Lucro Líquido</span>
+            </div>
+            <h3 class="m-0 font-weight-bold" style="color: var(--zinc-800);" id="dashLucro">R$ 0,00</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card p-4">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-exclamation-triangle text-warning mr-2"></i>
+                <span class="text-muted font-weight-bold" style="font-size: 0.8rem;">Alertas de Estoque</span>
+            </div>
+            <h3 class="m-0 font-weight-bold text-warning" id="dashAlertasEstoque">0</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card p-4">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-clipboard-list text-primary mr-2"></i>
+                <span class="text-muted font-weight-bold" style="font-size: 0.8rem;">O.S. Pendentes</span>
+            </div>
+            <h3 class="m-0 font-weight-bold" style="color: var(--zinc-800);" id="dashOsPendentes">0</h3>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card p-4">
+            <div class="d-flex align-items-center mb-2">
+                <i class="fas fa-boxes text-secondary mr-2"></i>
+                <span class="text-muted font-weight-bold" style="font-size: 0.8rem;">Total Peças</span>
+            </div>
+            <h3 class="m-0 font-weight-bold" style="color: var(--zinc-800);" id="dashTotalPecas">0</h3>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-5">
+    <div class="col-md-8">
+        <div class="glass-card p-4 h-100">
+            <h6 class="font-weight-bold mb-4" style="color: var(--zinc-800);">Desempenho Financeiro (Mês Atual)</h6>
+            <div style="height: 250px;">
+                <canvas id="graficoFinanceiro"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="glass-card p-4 h-100">
+            <h6 class="font-weight-bold mb-4"><i class="fas fa-exclamation-triangle text-warning mr-2"></i> Estoque Baixo</h6>
+
+            <div id="listaEstoqueBaixo" style="max-height: 250px; overflow-y: auto; padding-right: 5px;">
+                <div class="text-center text-muted mt-4">
+                    <i class="fas fa-spinner fa-spin mb-2"></i><br>Analisando estoque...
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
 
         <div class="card bg-gradient-info shadow-sm mb-4" style="border-radius: 15px;">
             <div class="card-body text-center p-4">
