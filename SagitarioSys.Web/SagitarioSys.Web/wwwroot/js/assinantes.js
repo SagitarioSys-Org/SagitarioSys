@@ -1,6 +1,4 @@
-﻿const API_ASSINANTES = "https://localhost:44373/api/Assinantes";
-const API_SEGMENTOS = "https://localhost:44373/api/Segmentos/ativos";
-
+﻿
 $(document).ready(function () {
     carregarSegmentos(); // Busca "Oficina, Loja de Roupas" direto do banco
     carregarAssinantes();
@@ -21,7 +19,7 @@ $.ajaxSetup({
 // NOVO: Preenche o <select> do Modal dinamicamente
 function carregarSegmentos() {
     $.ajax({
-        url: API_SEGMENTOS,
+        url: _url + "api/Segmentos/ativos",
         type: "GET",
         success: function (dados) {
             var html = '<option value="">Selecione...</option>';
@@ -35,7 +33,7 @@ function carregarSegmentos() {
 
 function carregarAssinantes() {
     $.ajax({
-        url: API_ASSINANTES,
+        url: _url + "api/Assinantes",
         type: "GET",
         success: function (dados) {
             var html = "";
@@ -78,7 +76,7 @@ function salvarAssinante() {
     var id = $("#txtEmpresaId").val();
     var isEdicao = id !== "";
     var metodo = isEdicao ? "PUT" : "POST";
-    var url = isEdicao ? `${API_ASSINANTES}/${id}` : API_ASSINANTES;
+    var url = isEdicao ? `${_url}api/Assinantes/${id}` : _url + "api/Assinantes";
 
     var dados = {
         nomeFantasia: $("#txtNomeFantasia").val(),
@@ -115,7 +113,7 @@ function salvarAssinante() {
 function editar(id) {
     $("#formAssinante")[0].reset();
     $.ajax({
-        url: `${API_ASSINANTES}/${id}`,
+        url: `${_url}api/Assinantes/${id}`,
         type: "GET",
         success: function (empresa) {
             $("#txtEmpresaId").val(empresa.id);
@@ -143,7 +141,7 @@ function deletar(id, nome) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${API_ASSINANTES}/${id}`,
+                url: `${_url}api/Assinantes/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire('Inativado!', 'A empresa foi inativada.', 'success');

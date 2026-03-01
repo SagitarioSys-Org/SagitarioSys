@@ -1,8 +1,4 @@
-﻿const API_OS = "https://localhost:44373/api/OrdensServico";
-const API_CLIENTES = "https://localhost:44373/api/Clientes";
-const API_VEICULOS = "https://localhost:44373/api/Veiculos";
-const API_ESTOQUE = "https://localhost:44373/api/Estoque";
-
+﻿
 let listaTodosVeiculos = []; // Guardamos na memória para filtrar rápido
 
 $(document).ready(function () {
@@ -19,7 +15,36 @@ $(document).ready(function () {
         e.preventDefault();
         salvar();
     });
+
+    $("#txtBuscaOS").on("keyup", filtrarOS);
+    $("#ddlFiltroStatus").on("change", filtrarOS);
 });
+
+function filtrarOS() {
+    var termo = $("#txtBuscaOS").val().toLowerCase();
+    var statusSelecionado = $("#ddlFiltroStatus").val().toLowerCase();
+
+    $("#tbOS tbody tr").each(function () {
+        // Se for a linha de "Carregando", ignora
+        if ($(this).find("td").length === 1) return;
+
+        var textoLinha = $(this).text().toLowerCase();
+        var statusLinha = $(this).data("status") ? $(this).data("status").toLowerCase() : "";
+
+        // Verifica se o texto digitado existe na linha
+        var matchTexto = textoLinha.indexOf(termo) > -1;
+
+        // Verifica se o status do dropdown bate com o status da linha (ou se está vazio/Todos)
+        var matchStatus = (statusSelecionado === "") || (statusLinha === statusSelecionado) || (statusLinha.indexOf(statusSelecionado) > -1);
+
+        // Só mostra a linha se passar nos dois testes
+        if (matchTexto && matchStatus) {
+            $(this).show();
+        } else {
+            $(this).hide();
+        }
+    });
+}
 
 $.ajaxSetup({
     beforeSend: function (xhr) {
@@ -33,18 +58,18 @@ $.ajaxSetup({
 // ==========================================
 function carregarListasAuxiliares() {
     // Busca Clientes
-    $.get(API_CLIENTES, function (dados) {
+    $.get(_url + "api/Clientes", function (dados) {
         var html = '<option value="">Selecione o Cliente...</option>';
         dados.forEach(c => html += `<option value="${c.id}">${c.nome}</option>`);
         $("#ddlCliente").html(html);
     });
 
     // Busca Veículos e guarda na memória
-    $.get(API_VEICULOS, function (dados) {
+    $.get(_url + "api/Veiculos", function (dados) {
         listaTodosVeiculos = dados;
     });
 
-    $.get(API_ESTOQUE, function (dados) {
+    $.get(_url + "api/Estoque", function (dados) {
         listaEstoque = dados;
     });
 }
@@ -178,7 +203,7 @@ function formatarMoeda(valor) {
 // ==========================================
 function carregarOrdens() {
     $.ajax({
-        url: API_OS,
+        url: _url + "api/OrdensServico",
         type: "GET",
         success: function (dados) {
             var html = "";
@@ -192,21 +217,24 @@ function carregarOrdens() {
 
                 let dataAbertura = new Date(os.dataAbertura).toLocaleDateString('pt-BR');
 
+                // 1. ADICIONADO O data-status AQUI NA <tr>
                 html += `
-                    <tr>
+                    <tr data-status="${os.status}">
                         <td class="font-weight-bold" style="font-family: 'JetBrains Mono';">#${os.numeroOS.toString().padStart(4, '0')}</td>
                         <td>
                             <div class="font-weight-bold">${os.nomeCliente}</div>
                             <div class="text-muted" style="font-size: 0.8rem;"><i class="fas fa-car mr-1"></i> ${os.modeloVeiculo} (${os.placaVeiculo})</div>
+                            
+                            <span style="display:none;">${os.cpfCnpj || os.clienteCpfCnpj || ''}</span>
                         </td>
                         <td>${dataAbertura}</td>
                         <td><span class="badge ${badgeClass} px-2 py-1" style="font-size: 0.75rem;">${os.status.toUpperCase()}</span></td>
                         <td class="text-right font-weight-bold text-success">${formatarMoeda(os.valorTotal)}</td>
-                       <td class="text-center">
-           <a href="/OrdensServico/Imprimir/${os.id}" target="_blank" class="btn btn-sm btn-light border shadow-sm mr-1" title="Imprimir PDF"><i class="fas fa-file-pdf text-danger"></i></a>
-            <button class="btn btn-sm btn-light border shadow-sm text-primary mr-1" onclick="editar('${os.id}')"><i class="fas fa-pen"></i></button>
-            <button class="btn btn-sm btn-light border shadow-sm text-danger" onclick="deletar('${os.id}')"><i class="fas fa-trash"></i></button>
-        </td>
+                        <td class="text-center">
+                            <a href="/OrdensServico/Imprimir/${os.id}" target="_blank" class="btn btn-sm btn-light border shadow-sm mr-1" title="Imprimir PDF"><i class="fas fa-file-pdf text-danger"></i></a>
+                            <button class="btn btn-sm btn-light border shadow-sm text-primary mr-1" onclick="editar('${os.id}')"><i class="fas fa-pen"></i></button>
+                            <button class="btn btn-sm btn-light border shadow-sm text-danger" onclick="deletar('${os.id}')"><i class="fas fa-trash"></i></button>
+                        </td>
                     </tr>
                 `;
             });
@@ -282,7 +310,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${API_OS}/${id}` : API_OS,
+        url: isEdicao ? `${_url}api/OrdensServico/${id}` : _url + "api/OrdensServico",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -301,7 +329,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${API_OS}/${id}`, function (os) {
+    $.get(`${_url}api/OrdensServico/${id}`, function (os) {
         $("#txtId").val(os.id);
         $("#ddlCliente").val(os.clienteId);
 
@@ -338,7 +366,7 @@ function deletar(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${API_OS}/${id}`,
+                url: `${_url}api/OrdensServico/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire({ title: 'Cancelada!', icon: 'success', timer: 1500, showConfirmButton: false });

@@ -1,8 +1,8 @@
-﻿const API_CLIENTES = "https://localhost:44373/api/Clientes";
-
+﻿
 $(document).ready(function () {
     carregarClientes();
 
+    // INTEGRAÇÃO VIACEP
     // INTEGRAÇÃO VIACEP
     $("#txtCep").on("blur", function () {
         var cep = $(this).val().replace(/\D/g, '');
@@ -14,8 +14,8 @@ $(document).ready(function () {
                     $("#txtLogradouro").val(dados.logradouro);
                     $("#txtBairro").val(dados.bairro);
                     $("#txtCidade").val(dados.localidade);
-                    $("#txtEstado").val(dados.uf);
-                    $("#txtNumero").focus(); // Joga o cursor para o número
+                    $("#txtUf").val(dados.uf); // CORREÇÃO AQUI: txtUf
+                    $("#txtNumero").focus();
                 } else {
                     Swal.fire('CEP não encontrado', 'Verifique o número digitado.', 'warning');
                 }
@@ -29,7 +29,31 @@ $(document).ready(function () {
         e.preventDefault();
         salvar();
     });
+
+    $('#txtCep').mask('00000-000');
+    $('#txtCpfCnpj').mask(cpfCnpjBehavior, cpfCnpjOptions);
 });
+
+// ==========================================
+// CONFIGURAÇÕES DAS MÁSCARAS INTELIGENTES
+// ==========================================
+var cpfCnpjBehavior = function (val) {
+    return val.replace(/\D/g, '').length <= 11 ? '000.000.000-009' : '00.000.000/0000-00';
+},
+    cpfCnpjOptions = {
+        onKeyPress: function (val, e, field, options) {
+            field.mask(cpfCnpjBehavior.apply({}, arguments), options);
+        }
+    };
+
+var telBehavior = function (val) {
+    return val.replace(/\D/g, '').length === 11 ? '(00) 00000-0000' : '(00) 0000-00009';
+},
+    telOptions = {
+        onKeyPress: function (val, e, field, options) {
+            field.mask(telBehavior.apply({}, arguments), options);
+        }
+    };
 
 $.ajaxSetup({
     beforeSend: function (xhr) {
@@ -43,24 +67,32 @@ $.ajaxSetup({
 // ==========================================
 // LÓGICA DAS LINHAS DINÂMICAS DE CONTATO
 // ==========================================
-function adicionarLinhaContato(contato = "", email = "", obs = "") {
+function adicionarLinhaContato(tel = "", email = "", obs = "") {
+    var idLinha = 'contato_' + Math.random().toString(36).substr(2, 9);
+
+    // Novo HTML com campos arredondados e botão lixeira limpo
     var html = `
-        <div class="row contato-row mb-2">
+        <div class="row mb-2 align-items-center linha-contato" id="${idLinha}">
             <div class="col-md-3">
-                <input type="text" class="form-control form-control-sm txtTel" placeholder="Telefone/Celular" value="${contato}">
+                <input type="text" class="form-control form-control-sm txt-tel" placeholder="Telefone/Celular" value="${tel}" style="border-radius: 6px;">
             </div>
             <div class="col-md-4">
-                <input type="email" class="form-control form-control-sm txtEmail" placeholder="E-mail" value="${email}">
+                <input type="email" class="form-control form-control-sm txt-email" placeholder="E-mail" value="${email}" style="border-radius: 6px;">
             </div>
             <div class="col-md-4">
-                <input type="text" class="form-control form-control-sm txtObs" placeholder="Observação (Ex: Recado)" value="${obs}">
+                <input type="text" class="form-control form-control-sm txt-obs" placeholder="Ex: Falar com a esposa" value="${obs}" style="border-radius: 6px;">
             </div>
             <div class="col-md-1 text-center">
-                <button type="button" class="btn btn-danger btn-sm" onclick="removerLinha(this)" title="Remover"><i class="fas fa-trash"></i></button>
+                <button type="button" class="btn btn-sm btn-outline-danger border-0 shadow-none" onclick="$('#${idLinha}').remove()" title="Remover Contato">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         </div>
     `;
+
     $("#boxContatos").append(html);
+
+    $(`#${idLinha} .txt-tel`).mask(telBehavior, telOptions);
 }
 
 function removerLinha(botao) {
@@ -72,7 +104,7 @@ function removerLinha(botao) {
 // ==========================================
 function carregarClientes() {
     $.ajax({
-        url: API_CLIENTES,
+        url: _url + "api/Clientes",
         type: "GET",
         success: function (dados) {
             var html = "";
@@ -114,17 +146,22 @@ function salvar() {
     var id = $("#txtId").val();
     var isEdicao = id !== "";
 
-    // MÁGICA: Varre todas as linhas de contato e monta o Array
-    var listaContatos = [];
-    $(".contato-row").each(function () {
-        var tel = $(this).find(".txtTel").val();
-        var email = $(this).find(".txtEmail").val();
-        var obs = $(this).find(".txtObs").val();
+    let cpfCnpjLimpo = $("#txtCpfCnpj").val().replace(/\D/g, '');
+    let cepLimpo = $("#txtCep").val().replace(/\D/g, '');
 
-        // Só adiciona se o cara digitou o telefone OU o email
-        if (tel !== "" || email !== "") {
+    var listaContatos = [];
+
+    // CORREÇÃO: A classe certa do HTML novo é .linha-contato
+    $(".linha-contato").each(function () {
+        let telLimpo = $(this).find(".txt-tel").val().replace(/\D/g, '');
+        // CORREÇÃO: As classes certas são com traço
+        var email = $(this).find(".txt-email").val();
+        var obs = $(this).find(".txt-obs").val();
+
+        // CORREÇÃO: Valida usando a variável telLimpo
+        if (telLimpo !== "" || email !== "") {
             listaContatos.push({
-                contato: tel,
+                contato: telLimpo,
                 email: email,
                 observacao: obs
             });
@@ -133,21 +170,26 @@ function salvar() {
 
     var dados = {
         nome: $("#txtNome").val(),
-        cpfCnpj: $("#txtCpfCnpj").val(),
-        cep: $("#txtCep").val(),
+        cpfCnpj: cpfCnpjLimpo,
+        cep: cepLimpo,
         logradouro: $("#txtLogradouro").val(),
         numero: $("#txtNumero").val(),
         bairro: $("#txtBairro").val(),
         cidade: $("#txtCidade").val(),
-        estado: $("#txtEstado").val(),
-        contatos: listaContatos // Envia a lista para a API (Transaction C# vai cuidar do resto)
+        uf: $("#txtUf").val(), // CORREÇÃO: Era txtEstado
+        contatos: listaContatos
     };
+
+    // CORREÇÃO DO ERRO 400: Adiciona o ID no pacote
+    if (isEdicao) {
+        dados.id = id;
+    }
 
     var $btn = $("#btnSalvar");
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${API_CLIENTES}/${id}` : API_CLIENTES,
+        url: isEdicao ? `${_url}api/Clientes/${id}` : _url + "api/Clientes",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -166,25 +208,26 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${API_CLIENTES}/${id}`, function (c) {
+    $.get(`${_url}api/Clientes/${id}`, function (c) {
         $("#txtId").val(c.id);
         $("#txtNome").val(c.nome);
-        $("#txtCpfCnpj").val(c.cpfCnpj);
-        $("#txtCep").val(c.cep);
+        $("#txtCpfCnpj").val(c.cpfCnpj).trigger('input');
+        $("#txtCep").val(c.cep).trigger('input');
         $("#txtLogradouro").val(c.logradouro);
         $("#txtNumero").val(c.numero);
         $("#txtBairro").val(c.bairro);
         $("#txtCidade").val(c.cidade);
-        $("#txtEstado").val(c.estado);
 
-        // Limpa a caixa e recria as linhas baseadas no que veio do banco
+        // CORREÇÃO: Atualiza o campo txtUf com a propriedade UF (ou estado) que vem da API
+        $("#txtUf").val(c.uf || c.estado);
+
         $("#boxContatos").empty();
         if (c.contatos && c.contatos.length > 0) {
             c.contatos.forEach(contato => {
                 adicionarLinhaContato(contato.contato, contato.email, contato.observacao);
             });
         } else {
-            adicionarLinhaContato(); // Se não tiver nada, bota uma linha vazia
+            adicionarLinhaContato();
         }
 
         $("#modalTitle").html('<i class="fas fa-user-edit mr-2"></i> Editar Cliente');
@@ -204,7 +247,7 @@ function deletar(id, nome) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${API_CLIENTES}/${id}`,
+                url: `${_url}api/Clientes/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire({ title: 'Excluído!', icon: 'success', timer: 1500, showConfirmButton: false });

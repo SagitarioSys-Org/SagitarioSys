@@ -62,7 +62,8 @@ namespace SagitarioSys.Api.Controllers
                 Token = jwtStr,
                 Usuario = usuario.Nome,
                 Empresa = usuario.NomeFantasia,
-                Tipo = usuario.TipoNegocio
+                Tipo = usuario.TipoNegocio,
+                RotaDashboard = usuario.RotaDashboard
             });
         }
     }

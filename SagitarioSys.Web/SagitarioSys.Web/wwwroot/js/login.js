@@ -1,6 +1,4 @@
-﻿// Define a URL da API (ajuste a porta se necessário)
-const API_URL = "https://localhost:44373/api/Auth/login";
-
+﻿
 $(document).ready(function () {
     // Se já estiver logado, manda pro Dashboard direto
     if (localStorage.getItem("jwt_token")) {
@@ -24,7 +22,7 @@ function fazerLogin() {
     $alerta.addClass("d-none");
 
     $.ajax({
-        url: API_URL,
+        url: _url + "api/Auth/login",
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify({ email: email, senha: senha }),
@@ -34,6 +32,8 @@ function fazerLogin() {
             localStorage.setItem("user_nome", response.usuario);
             localStorage.setItem("user_empresa", response.empresa);
             localStorage.setItem("user_tipo", response.tipo);
+         
+            localStorage.setItem("user_rota_dashboard", response.rotaDashboard);
 
             // Redireciona com um pequeno delay para ficar elegante
             $btn.removeClass("btn-primary").addClass("btn-success").html('<i class="fas fa-check"></i> Sucesso! Redirecionando...');

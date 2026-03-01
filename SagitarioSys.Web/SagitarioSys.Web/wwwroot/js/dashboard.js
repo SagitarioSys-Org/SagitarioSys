@@ -1,7 +1,6 @@
 ﻿$(document).ready(function () {
     // 1. Inicia os Widgets de Entretenimento e Utilidade
-    iniciarRelogio();
-    carregarFraseDoDia();
+    iniciarRelogio();   
     carregarClimaEInfoLocal();
 
     // 2. Traz o Nome do Usuário Logado
@@ -29,8 +28,8 @@ $.ajaxSetup({
 // ==========================================
 function carregarDadosDashboardGestao() {
     $.when(
-        $.get("https://localhost:44373/api/OrdensServico"),
-        $.get("https://localhost:44373/api/Estoque")
+        $.get(_url + "api/OrdensServico"),
+        $.get(_url + "api/Estoque")
     ).done(function (osResponse, estoqueResponse) {
 
         const ordens = osResponse[0];
@@ -164,47 +163,6 @@ function iniciarRelogio() {
         $("#lblDataAtual").text(dataFormatada);
         $("#lblHoraAtual").text(horaFormatada);
     }, 1000);
-}
-
-function carregarFraseDoDia() {
-    $("#lblQuote").text("Buscando inspiração...");
-    $("#lblQuoteAuthor").text("");
-
-    const urlApi = "https://frases.docapi.dev/frase/obter";
-
-    $.ajax({
-        url: urlApi,
-        type: "GET",
-        success: function (data) {
-            if (data && data.resposta && data.resposta.length > 0) {
-                const indexAleatorio = Math.floor(Math.random() * data.resposta.length);
-                const fraseEscolhida = data.resposta[indexAleatorio];
-
-                $("#lblQuote").text(`"${fraseEscolhida.frase}"`);
-
-                let autor = fraseEscolhida.nomeAutor;
-                if (!autor || autor.trim() === "") autor = "Autor Desconhecido";
-
-                $("#lblQuoteAuthor").text(`- ${autor}`);
-            } else {
-                chamarFraseFallback();
-            }
-        },
-        error: function () {
-            chamarFraseFallback();
-        }
-    });
-}
-
-function chamarFraseFallback() {
-    const frasesFallback = [
-        { q: "O sucesso é a soma de pequenos esforços repetidos dia após dia.", a: "Robert Collier" },
-        { q: "A inovação distingue um líder de um seguidor.", a: "Steve Jobs" },
-        { q: "Não tenha medo de desistir do bom para perseguir o ótimo.", a: "John D. Rockefeller" }
-    ];
-    const index = Math.floor(Math.random() * frasesFallback.length);
-    $("#lblQuote").text(`"${frasesFallback[index].q}"`);
-    $("#lblQuoteAuthor").text(`- ${frasesFallback[index].a}`);
 }
 
 function carregarClimaEInfoLocal() {

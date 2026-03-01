@@ -1,5 +1,4 @@
-﻿const API_PECAS = "https://localhost:44373/api/Estoque";
-let listaPecas = [];
+﻿let listaPecas = [];
 
 $(document).ready(function () {
     carregarPecas();
@@ -27,7 +26,7 @@ $.ajaxSetup({
 
 function carregarPecas() {
     $.ajax({
-        url: API_PECAS,
+        url: _url + "api/Estoque",
         type: "GET",
         success: function (dados) {
             listaPecas = dados;
@@ -124,7 +123,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${API_PECAS}/${id}` : API_PECAS,
+        url: isEdicao ? `${_url}api/Estoque/${id}` : _url + "api/Estoque",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -143,7 +142,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${API_PECAS}/${id}`, function (p) {
+    $.get(`${_url}api/Estoque/${id}`, function (p) {
         $("#txtId").val(p.id);
         $("#txtNome").val(p.nome);
         $("#txtSku").val(p.sku);
@@ -168,7 +167,7 @@ function deletar(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${API_PECAS}/${id}`,
+                url: `${_url}api/Estoque/${id}`,
                 type: "DELETE",
                 success: function () {
                     carregarPecas();

@@ -1,0 +1,141 @@
+﻿
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Fluxo de Caixa</h2>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">Controle de receitas, despesas e saldo da empresa.</p>
+    </div>
+    <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--emerald-500); color: white; border-radius: 8px;" onclick="abrirModal()">
+        <i class="fas fa-plus mr-2"></i> Novo Lançamento
+    </button>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="glass-card p-4" style="border-bottom: 4px solid #10b981;">
+            <div class="text-muted font-weight-bold mb-1" style="font-size: 0.85rem;"><i class="fas fa-arrow-up text-success mr-1"></i> RECEITAS (PAGAS)</div>
+            <h3 class="m-0 font-weight-bold text-success" id="lblTotalReceitas">R$ 0,00</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4" style="border-bottom: 4px solid #ef4444;">
+            <div class="text-muted font-weight-bold mb-1" style="font-size: 0.85rem;"><i class="fas fa-arrow-down text-danger mr-1"></i> DESPESAS (PAGAS)</div>
+            <h3 class="m-0 font-weight-bold text-danger" id="lblTotalDespesas">R$ 0,00</h3>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="glass-card p-4" style="border-bottom: 4px solid #3b82f6;">
+            <div class="text-muted font-weight-bold mb-1" style="font-size: 0.85rem;"><i class="fas fa-wallet text-primary mr-1"></i> SALDO EM CAIXA</div>
+            <h3 class="m-0 font-weight-bold text-primary" id="lblSaldoTotal">R$ 0,00</h3>
+        </div>
+    </div>
+</div>
+
+<div class="glass-card p-0 overflow-hidden mb-4">
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover align-middle m-0" id="tbFinanceiro">
+            <thead class="bg-light text-muted" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                <tr>
+                    <th class="pl-4 py-3">Vencimento</th>
+                    <th class="py-3">Descrição / Categoria</th>
+                    <th class="py-3">Tipo</th>
+                    <th class="py-3">Status</th>
+                    <th class="py-3 text-right">Valor</th>
+                    <th class="py-3 text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="6" class="text-center py-4 text-muted"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando financeiro...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFinanceiro" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+            <div class="modal-header bg-light border-0" style="border-radius: 12px 12px 0 0;">
+                <h5 class="modal-title font-weight-bold" id="modalTitle" style="color: var(--zinc-800);">Novo Lançamento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formFinanceiro">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="txtId">
+                    
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Tipo do Lançamento *</label>
+                            <select id="ddlTipo" class="form-control shadow-none" required>
+                                <option value="Receita">Receita (Entrada)</option>
+                                <option value="Despesa">Despesa (Saída)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Categoria *</label>
+                            <select id="ddlCategoria" class="form-control shadow-none" required>
+                                <option value="">Carregando categorias...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Descrição *</label>
+                        <input type="text" id="txtDescricao" class="form-control shadow-none" placeholder="Ex: Pagamento de Fornecedor XYZ" required>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Valor (R$) *</label>
+                            <input type="number" step="0.01" id="txtValor" class="form-control shadow-none font-weight-bold text-primary" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label id="lblVencimento" class="font-weight-bold text-muted" style="font-size: 0.85rem;">Vencimento *</label>
+                            <input type="date" id="txtVencimento" class="form-control shadow-none" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label id="lblPagamento" class="font-weight-bold text-muted" style="font-size: 0.85rem;">Data Pagamento</label>
+                            <input type="date" id="txtPagamento" class="form-control shadow-none">
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Status *</label>
+                            <select id="ddlStatus" class="form-control shadow-none" required>
+                                <option value="Pendente">Pendente</option>
+                                <option value="Pago">Pago</option>
+                                <option value="Atrasado">Atrasado</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Forma de Pagamento</label>
+                            <select id="ddlFormaPgto" class="form-control shadow-none">
+                                <option value="">Selecione...</option>
+                                <option value="PIX">PIX</option>
+                                <option value="Dinheiro">Dinheiro</option>
+                                <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                <option value="Cartão de Débito">Cartão de Débito</option>
+                                <option value="Boleto">Boleto</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light font-weight-bold" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn font-weight-bold px-4" id="btnSalvar" style="background-color: var(--emerald-500); color: white;">
+                        <i class="fas fa-save mr-1"></i> Salvar Lançamento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/financeiro.js" asp-append-version="true"></script>
+}
