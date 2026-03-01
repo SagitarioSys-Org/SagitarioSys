@@ -1,18 +1,36 @@
-﻿@{
-    ViewData["Title"] = "Ordens de Serviço";
-}
-
+﻿
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-<div class="glass-card mb-4 p-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-        <h3 class="m-0 font-weight-bold" style="color: var(--zinc-800); font-size: 1.5rem;">
-            <i class="fas fa-clipboard-list text-primary mr-2"></i> Gestão de OS
-        </h3>
-        <button class="btn btn-primary font-weight-bold shadow-sm" style="border-radius: 8px;" onclick="abrirModal()">
-            <i class="fas fa-plus mr-1"></i> Nova O.S.
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+        <div>
+            <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Ordens de Serviço</h2>
+            <p class="text-muted m-0" style="font-size: 0.95rem;">Gerencie os orçamentos, manutenções e status.</p>
+        </div>
+        <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
+            <i class="fas fa-plus mr-2"></i> Nova O.S.
         </button>
     </div>
+
+    <div class="glass-card p-0 overflow-hidden mb-4">
+
+        <div class="p-3 border-bottom d-flex align-items-center bg-white justify-content-between">
+            <div class="d-flex align-items-center flex-grow-1 mr-3">
+                <i class="fas fa-search text-muted mr-3 pl-2"></i>
+                <input type="text" id="txtBuscaOS" class="form-control border-0 shadow-none p-0" placeholder="Buscar por cliente, CPF/CNPJ, placa ou número da OS..." style="font-size: 0.95rem; background: transparent;">
+            </div>
+
+            <div class="d-flex align-items-center border-left pl-3" style="min-width: 200px;">
+                <i class="fas fa-filter text-muted mr-2"></i>
+                <select id="ddlFiltroStatus" class="form-control border-0 shadow-none text-muted font-weight-bold p-0" style="font-size: 0.90rem; background: transparent; cursor: pointer;">
+                    <option value="">Todos os Status</option>
+                    <option value="Aberta">Aberta</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Aguardando Peças">Aguardando Peças</option>
+                    <option value="Concluida">Concluída</option>
+                    <option value="Cancelada">Cancelada</option>
+                </select>
+            </div>
+        </div>
 
     <div class="table-responsive">
         <table class="table table-hover align-middle" id="tbOS">

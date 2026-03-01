@@ -1,6 +1,4 @@
-﻿const API_VEICULOS = "https://localhost:44373/api/Veiculos";
-const API_CLIENTES = "https://localhost:44373/api/Clientes"; // Precisamos do endpoint de clientes!
-const FIPE_BASE = "https://parallelum.com.br/fipe/api/v1/carros/marcas";
+﻿const FIPE_BASE = "https://parallelum.com.br/fipe/api/v1/carros/marcas";
 
 $(document).ready(function () {
     carregarClientes();
@@ -67,11 +65,10 @@ $.ajaxSetup({
 });
 
 function carregarClientes() {
-    $.get(API_CLIENTES, function (dados) {
+    $.get(_url + "api/Clientes", function (dados) {
         var html = '<option value="">Selecione o proprietário...</option>';
         dados.forEach(c => {
-            // MÁGICA AQUI: O banco agora devolve uma lista de "Contatos" pra cada cliente.
-            // Nós tentamos pegar o primeiro contato disponível (telefone ou email).
+       
             let contatoPrincipal = "Sem Tel";
             if (c.contatos && c.contatos.length > 0) {
                 contatoPrincipal = c.contatos[0].contato || c.contatos[0].email || "Sem Tel";
@@ -93,7 +90,7 @@ function carregarMarcasFipe() {
 
 function carregarVeiculos() {
     $.ajax({
-        url: API_VEICULOS,
+        url: _url + "api/Veiculos",
         type: "GET",
         success: function (dados) {
             var html = "";
@@ -148,7 +145,7 @@ function salvar() {
         anoFab = 2024; // fallback se falhar a API
         anoMod = 2024;
     }
-
+  
     var dados = {
         clienteId: $("#ddlCliente").val(),
         placa: $("#txtPlaca").val(),
@@ -161,11 +158,15 @@ function salvar() {
         kmAtual: parseInt($("#txtKm").val()) || 0 // Puxa o KM da tela
     };
 
+    if (isEdicao) {
+        dados.id = id;
+    }
+
     var $btn = $("#btnSalvar");
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${API_VEICULOS}/${id}` : API_VEICULOS,
+        url: isEdicao ? `${_url}api/Veiculos/${id}` : _url + "api/Veiculos",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -184,7 +185,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${API_VEICULOS}/${id}`, function (v) {
+    $.get(`${_url}api/Veiculos/${id}`, function (v) {
         $("#txtId").val(v.id);
         $("#ddlCliente").val(v.clienteId);
 
@@ -221,7 +222,7 @@ function deletar(id, placa) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${API_VEICULOS}/${id}`,
+                url: `${_url}api/Veiculos/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire({ title: 'Removido!', icon: 'success', timer: 1500, showConfirmButton: false });

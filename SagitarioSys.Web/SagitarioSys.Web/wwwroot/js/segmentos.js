@@ -1,5 +1,4 @@
-﻿const API_SEGMENTOS = "https://localhost:44373/api/Segmentos";
-
+﻿
 $(document).ready(function () {
     carregarSegmentos();
 
@@ -18,7 +17,7 @@ $.ajaxSetup({
 
 function carregarSegmentos() {
     $.ajax({
-        url: API_SEGMENTOS,
+        url: _url + "api/Segmentos",
         type: "GET",
         success: function (dados) {
             var html = "";
@@ -61,7 +60,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${API_SEGMENTOS}/${id}` : API_SEGMENTOS,
+        url: isEdicao ? `${_url}api/Segmentos/${id}` : _url + "api/Segmentos",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -80,7 +79,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${API_SEGMENTOS}/${id}`, function (seg) {
+    $.get(`${_url}/api/Segmentos/${id}`, function (seg) {
         $("#txtId").val(seg.id);
         $("#txtNome").val(seg.nome);
         $("#chkAtivo").prop("checked", seg.ativo);
@@ -101,7 +100,7 @@ function deletar(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${API_SEGMENTOS}/${id}`,
+                url: `${_url}api/Segmentos/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire({ title: 'Inativado!', icon: 'success', timer: 1500, showConfirmButton: false });

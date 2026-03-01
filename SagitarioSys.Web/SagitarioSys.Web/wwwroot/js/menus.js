@@ -1,7 +1,4 @@
-﻿const API_MENUS = "https://localhost:44373/api/Menus";
-const API_SEGMENTOS = "https://localhost:44373/api/Segmentos"; // Pega todos os segmentos (para o CEO)
-const API_ASSINANTES = "https://localhost:44373/api/Assinantes";
-
+﻿
 $(document).ready(function () {
     // Carrega tudo ao iniciar a tela
     carregarListasAuxiliares();
@@ -21,6 +18,19 @@ $(document).ready(function () {
     $("#ddlSegmento").on("change", function () {
         atualizarComboMenuPai($(this).val(), $("#txtId").val());
     });
+
+    $("#tbMenus").on("click", ".segmento-header", function () {
+        // Mostra/Esconde as linhas de menu abaixo deste cabeçalho
+        $(this).nextUntil(".segmento-header").fadeToggle(200);
+
+        // Troca o ícone da pasta (Fechada <-> Aberta)
+        var $iconePasta = $(this).find(".icone-pasta");
+        if ($iconePasta.hasClass("fa-folder")) {
+            $iconePasta.removeClass("fa-folder").addClass("fa-folder-open");
+        } else {
+            $iconePasta.removeClass("fa-folder-open").addClass("fa-folder");
+        }
+    });
 });
 
 $.ajaxSetup({
@@ -33,14 +43,14 @@ $.ajaxSetup({
 // Preenche os dois <select> do Modal
 function carregarListasAuxiliares() {
     // 1. Carrega os Segmentos
-    $.get(API_SEGMENTOS, function (dados) {
+    $.get(_url + "api/Segmentos", function (dados) {
         var html = '<option value="">Selecione o Segmento...</option>';
         dados.forEach(seg => html += `<option value="${seg.id}">${seg.nome}</option>`);
         $("#ddlSegmento").html(html);
     });
 
     // 2. Carrega as Empresas (Assinantes)
-    $.get(API_ASSINANTES, function (dados) {
+    $.get(_url + "api/Assinantes", function (dados) {
         var html = '<option value="">Não (Menu Global para o segmento)</option>';
         dados.forEach(emp => html += `<option value="${emp.id}">${emp.nomeFantasia} (CNPJ: ${emp.cnpjCpf})</option>`);
         $("#ddlEmpresa").html(html);
@@ -52,7 +62,7 @@ var todosOsMenus = []; // Variável global para guardar a lista
 
 function carregarMenus() {
     $.ajax({
-        url: API_MENUS,
+        url: _url + "api/Menus",
         type: "GET",
         success: function (dados) {
             todosOsMenus = dados; // Guarda para usarmos no modal
@@ -63,11 +73,14 @@ function carregarMenus() {
                 html = '<tr><td colspan="6" class="text-center py-4">Nenhum menu cadastrado.</td></tr>';
             } else {
                 dados.forEach(function (m) {
+
+                    // 1. DESENHA O CABEÇALHO DO SEGMENTO (Clica para abrir)
                     if (m.nomeSegmento !== segmentoAtual) {
                         html += `
-                            <tr style="background-color: #e9ecef;">
+                            <tr class="segmento-header" style="background-color: #e9ecef; cursor: pointer;">
                                 <td colspan="6" class="text-left font-weight-bold text-uppercase text-primary py-2" style="border-top: 2px solid #dee2e6;">
-                                    <i class="fas fa-folder-open mr-2"></i> Segmento: ${m.nomeSegmento}
+                                    <i class="fas fa-folder mr-2 icone-pasta"></i> Segmento: ${m.nomeSegmento}
+                                    <i class="fas fa-chevron-down float-right mt-1 text-muted"></i>
                                 </td>
                             </tr>
                         `;
@@ -76,13 +89,13 @@ function carregarMenus() {
 
                     var vip = m.empresaId ? `<span class="badge badge-warning"><i class="fas fa-crown"></i> ${m.nomeEmpresa}</span>` : '<span class="text-muted">Global</span>';
 
-                    // Se for filho, adiciona um visual de "Sub-item"
                     var tituloVisual = m.menuPaiId
                         ? `<span class="text-muted mr-1">↳</span> ${m.titulo} <small class="text-info">(de ${m.nomeMenuPai})</small>`
                         : `<span class="font-weight-bold">${m.titulo}</span>`;
 
+                    // 2. DESENHA A LINHA DO MENU (Nasce com display: none para ficar oculta)
                     html += `
-                        <tr>
+                        <tr style="display: none;">
                             <td class="text-center align-middle"><i class="${m.icone} fa-lg text-secondary"></i></td>
                             <td class="align-middle pl-4">${tituloVisual}</td>
                             <td class="align-middle text-primary"><code>${m.rota}</code></td>
@@ -139,7 +152,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${API_MENUS}/${id}` : API_MENUS,
+        url: isEdicao ? `${_url}api/Menus/${id}` : _url + "api/Menus",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -158,7 +171,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${API_MENUS}/${id}`, function (m) {
+    $.get(`${_url}api/Menus/${id}`, function (m) {
         $("#txtId").val(m.id);
         $("#txtTitulo").val(m.titulo);
         $("#txtIcone").val(m.icone);
@@ -189,7 +202,7 @@ function deletar(id, titulo) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${API_MENUS}/${id}`,
+                url: `${_url}api/Menus/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire({ title: 'Deletado!', icon: 'success', timer: 1500, showConfirmButton: false });

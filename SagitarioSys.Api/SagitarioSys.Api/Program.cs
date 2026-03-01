@@ -27,6 +27,8 @@ builder.Services.AddScoped<MenuRepository>();
 builder.Services.AddScoped<VeiculoRepository>();
 builder.Services.AddScoped<OrdemServicoRepository>();
 builder.Services.AddScoped<PecaRepository>();
+builder.Services.AddScoped<FinanceiroRepository>();
+builder.Services.AddScoped<CategoriaFinanceiraRepository>();
 
 // 2. Adicionar os Controllers
 builder.Services.AddControllers();
