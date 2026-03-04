@@ -32,3 +32,6 @@ secrets.json
 **/publish/
 *.pfx
 *.p12
+
+# Docker (contém senhas e credenciais)
+docker-compose.yml
