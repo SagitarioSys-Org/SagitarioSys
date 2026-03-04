@@ -76,6 +76,16 @@ namespace SagitarioSys.Api.Repositories
         public async Task<bool> DeletarAsync(Guid id, Guid empresaId)
         {
             using var connection = _dbFactory.CreateConnection();
+
+            // Trava de Segurança: Verifica se o lançamento veio de uma OS
+            var sqlCheck = "SELECT OrdemServicoId FROM LancamentosFinanceiros WHERE Id = @Id AND EmpresaId = @EmpresaId;";
+            var osId = await connection.QuerySingleOrDefaultAsync<Guid?>(sqlCheck, new { Id = id, EmpresaId = empresaId });
+
+            if (osId != null)
+            {
+                throw new Exception("Este lançamento pertence a uma Ordem de Serviço. Você não pode apagá-lo por aqui.");
+            }
+
             var sql = "DELETE FROM LancamentosFinanceiros WHERE Id = @Id AND EmpresaId = @EmpresaId;";
             return await connection.ExecuteAsync(sql, new { Id = id, EmpresaId = empresaId }) > 0;
         }

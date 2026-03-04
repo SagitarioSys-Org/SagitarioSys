@@ -9,7 +9,7 @@ namespace SagitarioSys.Web.Controllers
         {
             return View();
         }
-
+        [HttpGet("OrdensServico/Imprimir/{id}")]
         public IActionResult Imprimir(Guid id)
         {
             ViewBag.OsId = id; // Passa o ID para a tela

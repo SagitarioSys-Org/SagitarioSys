@@ -13,6 +13,7 @@
         public decimal ValorTotal { get; set; }
         public DateTime DataAbertura { get; set; }
         public DateTime? DataConclusao { get; set; }
+        public int? KmAtual { get; set; }
 
         // Propriedades Auxiliares (Para mostrar na tela)
         public string NomeCliente { get; set; } = string.Empty;

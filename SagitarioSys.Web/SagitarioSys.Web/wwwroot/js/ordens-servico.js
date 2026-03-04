@@ -16,6 +16,11 @@ $(document).ready(function () {
         salvar();
     });
 
+    $("#formFaturarOS").on("submit", function (e) {
+        e.preventDefault();
+        confirmarFaturamento();
+    });
+
     $("#txtBuscaOS").on("keyup", filtrarOS);
     $("#ddlFiltroStatus").on("change", filtrarOS);
 });
@@ -45,13 +50,6 @@ function filtrarOS() {
         }
     });
 }
-
-$.ajaxSetup({
-    beforeSend: function (xhr) {
-        var token = localStorage.getItem("jwt_token");
-        if (token) xhr.setRequestHeader("Authorization", "Bearer " + token);
-    }
-});
 
 // ==========================================
 // 1. CARREGAMENTO E FILTROS (Clientes e Veículos)
@@ -214,23 +212,30 @@ function carregarOrdens() {
                 if (os.status === "Em Andamento") badgeClass = "badge-warning";
                 if (os.status === "Concluida") badgeClass = "badge-success";
                 if (os.status === "Cancelada") badgeClass = "badge-danger";
+                // Adicionando uma cor diferente caso já esteja Faturada
+                if (os.status === "Faturada") badgeClass = "badge-info";
 
                 let dataAbertura = new Date(os.dataAbertura).toLocaleDateString('pt-BR');
 
-                // 1. ADICIONADO O data-status AQUI NA <tr>
+                // ✨ NOVO: Verifica se o status permite faturar
+                let btnFaturar = "";
+                if (os.status !== "Faturada" && os.status !== "Cancelada") {
+                    btnFaturar = `<button class="btn btn-sm btn-success mr-1 shadow-sm" onclick="abrirModalFaturar('${os.id}', ${os.valorTotal})" title="Faturar e Receber OS"><i class="fas fa-dollar-sign"></i></button>`;
+                }
+
                 html += `
                     <tr data-status="${os.status}">
                         <td class="font-weight-bold" style="font-family: 'JetBrains Mono';">#${os.numeroOS.toString().padStart(4, '0')}</td>
                         <td>
                             <div class="font-weight-bold">${os.nomeCliente}</div>
                             <div class="text-muted" style="font-size: 0.8rem;"><i class="fas fa-car mr-1"></i> ${os.modeloVeiculo} (${os.placaVeiculo})</div>
-                            
                             <span style="display:none;">${os.cpfCnpj || os.clienteCpfCnpj || ''}</span>
                         </td>
                         <td>${dataAbertura}</td>
                         <td><span class="badge ${badgeClass} px-2 py-1" style="font-size: 0.75rem;">${os.status.toUpperCase()}</span></td>
                         <td class="text-right font-weight-bold text-success">${formatarMoeda(os.valorTotal)}</td>
                         <td class="text-center">
+                            ${btnFaturar}
                             <a href="/OrdensServico/Imprimir/${os.id}" target="_blank" class="btn btn-sm btn-light border shadow-sm mr-1" title="Imprimir PDF"><i class="fas fa-file-pdf text-danger"></i></a>
                             <button class="btn btn-sm btn-light border shadow-sm text-primary mr-1" onclick="editar('${os.id}')"><i class="fas fa-pen"></i></button>
                             <button class="btn btn-sm btn-light border shadow-sm text-danger" onclick="deletar('${os.id}')"><i class="fas fa-trash"></i></button>
@@ -246,6 +251,7 @@ function carregarOrdens() {
 function abrirModal() {
     $("#formOS")[0].reset();
     $("#txtId").val("");
+    $("#txtKmAtual").val("");
     $("#boxItensOS").empty();
     $("#ddlVeiculo").html('<option value="">Selecione o cliente primeiro</option>').prop("disabled", true);
 
@@ -296,6 +302,7 @@ function salvar() {
         clienteId: $("#ddlCliente").val(),
         veiculoId: $("#ddlVeiculo").val(),
         status: $("#ddlStatus").val(),
+        kmAtual: $("#txtKmAtual").val() ? parseInt($("#txtKmAtual").val()) : null,
         relatoCliente: $("#txtRelato").val(),
         observacoesInternas: $("#txtObs").val(),
         itens: listaItens
@@ -319,8 +326,22 @@ function salvar() {
             Swal.fire({ title: 'Salvo!', text: 'A O.S foi registrada com sucesso.', icon: 'success', timer: 1500, showConfirmButton: false });
             carregarOrdens();
         },
-        error: function () {
-            Swal.fire('Erro!', 'Erro ao salvar a O.S. (Verifique o console para mais detalhes)', 'error');
+        error: function (xhr) {
+            // Imprime o erro técnico completo no console para podermos investigar
+            console.error("ERRO 400 COMPLETO:", xhr.responseText);
+
+            // Tenta ler a mensagem amigável que o C# mandou
+            var msg = "Erro ao salvar a O.S. (Verifique o console para detalhes).";
+
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.message) {
+                    msg = xhr.responseJSON.message; // Mensagem do nosso Controller
+                } else if (xhr.responseJSON.errors) {
+                    msg = "Faltam campos obrigatórios no formulário. Verifique o console."; // Erro automático do ASP.NET
+                }
+            }
+
+            Swal.fire('Erro!', msg, 'error');
         },
         complete: function () {
             $btn.prop("disabled", false).html('<i class="fas fa-check mr-2"></i> Salvar O.S.');
@@ -336,6 +357,7 @@ function editar(id) {
         // Carrega os veículos daquele cliente e já deixa o dele selecionado
         filtrarVeiculos(os.clienteId, os.veiculoId);
 
+        $("#txtKmAtual").val(os.kmAtual);
         $("#ddlStatus").val(os.status);
         $("#txtRelato").val(os.relatoCliente);
         $("#txtObs").val(os.observacoesInternas);
@@ -348,9 +370,31 @@ function editar(id) {
                 adicionarItemOS(i.tipo, i.descricao, i.quantidade, i.valorUnitario, i.pecaId);
             });
         }
+        if (os.status === "Faturada") {
+            // 1. Desativa todos os campos de texto e selects
+            $("#formOS input, #formOS select, #formOS textarea").prop("disabled", true);
 
-        $("#modalTitle").text(`Editar O.S #${os.numeroOS.toString().padStart(4, '0')}`);
+            // 2. Esconde os botões de ação (Salvar, Adicionar Item e os "X" vermelhos dos itens)
+            $("#btnSalvar").hide();
+            $("#btnAdicionarItemOS").hide();
+
+            // Um pequeno delay para dar tempo do HTML dos itens ser desenhado antes de esconder os botões de apagar
+            setTimeout(() => { $(".btn-outline-danger").hide(); }, 100);
+
+            // 3. Muda o título para deixar claro que é apenas visualização
+            $("#modalTitle").html(`<i class="fas fa-lock text-warning mr-2"></i> Visualizar O.S #${os.numeroOS.toString().padStart(4, '0')} (Fechada)`);
+        } else {
+            // Se não for faturada, destrava tudo (caso o utilizador tenha aberto uma faturada antes)
+            $("#formOS input, #formOS select, #formOS textarea").prop("disabled", false);
+            $("#btnSalvar").show();
+            $("#btnAdicionarItemOS").show();
+            setTimeout(() => { $(".btn-outline-danger").show(); }, 100);
+
+            $("#modalTitle").html(`<i class="fas fa-edit mr-2"></i> Editar O.S #${os.numeroOS.toString().padStart(4, '0')}`);
+        }
+
         $("#modalOS").modal("show");
+        
     });
 }
 
@@ -373,6 +417,67 @@ function deletar(id) {
                     carregarOrdens();
                 }
             });
+        }
+    });
+}
+
+// ==========================================
+// 💰 INTEGRAÇÃO COM O FLUXO DE CAIXA
+// ==========================================
+
+function abrirModalFaturar(id, valorTotal) {
+    // Limpa o formulário
+    $("#formFaturarOS")[0].reset();
+
+    // Guarda o ID da OS escondido
+    $("#txtFaturarOsId").val(id);
+
+    // Mostra o valor de forma amigável
+    $("#lblValorFaturar").text(parseFloat(valorTotal).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }));
+
+    // Já sugere a data de hoje para agilizar o trabalho do mecânico
+    document.getElementById('txtDataPgtoOS').valueAsDate = new Date();
+
+    // Abre a tela
+    $("#modalFaturarOS").modal("show");
+}
+
+function confirmarFaturamento() {
+    var idOS = $("#txtFaturarOsId").val();
+
+    var dados = {
+        formaPagamento: $("#ddlFormaPgtoOS").val(),
+        dataPagamento: $("#txtDataPgtoOS").val()
+    };
+
+    var $btn = $("#btnConfirmarFaturamento");
+    $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Processando...');
+
+    $.ajax({
+        // A rota que criámos no backend!
+        url: _url + `api/OrdensServico/${idOS}/faturar`,
+        type: "POST",
+        contentType: "application/json",
+        data: JSON.stringify(dados),
+        success: function (resposta) {
+            $("#modalFaturarOS").modal("hide");
+
+            Swal.fire({
+                title: 'OS Faturada!',
+                text: 'O dinheiro já está no Fluxo de Caixa.',
+                icon: 'success',
+                timer: 2000,
+                showConfirmButton: false
+            });
+          
+            carregarOrdens();
+        },
+        error: function (xhr) {
+            var msg = xhr.responseJSON ? xhr.responseJSON.message : "Erro ao faturar.";
+            Swal.fire('Atenção!', msg, 'error');
+        },
+        complete: function () {
+            $btn.prop("disabled", false).html('<i class="fas fa-check mr-1"></i> Confirmar e Lançar no Caixa');
         }
     });
 }

@@ -55,14 +55,7 @@ var telBehavior = function (val) {
         }
     };
 
-$.ajaxSetup({
-    beforeSend: function (xhr) {
-        if (!this.url.includes("viacep.com")) {
-            var token = localStorage.getItem("jwt_token");
-            if (token) xhr.setRequestHeader("Authorization", "Bearer " + token);
-        }
-    }
-});
+
 
 // ==========================================
 // LÓGICA DAS LINHAS DINÂMICAS DE CONTATO
