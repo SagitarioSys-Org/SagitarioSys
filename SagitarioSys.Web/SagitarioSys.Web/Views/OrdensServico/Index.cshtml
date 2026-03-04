@@ -21,14 +21,15 @@
 
             <div class="d-flex align-items-center border-left pl-3" style="min-width: 200px;">
                 <i class="fas fa-filter text-muted mr-2"></i>
-                <select id="ddlFiltroStatus" class="form-control border-0 shadow-none text-muted font-weight-bold p-0" style="font-size: 0.90rem; background: transparent; cursor: pointer;">
-                    <option value="">Todos os Status</option>
-                    <option value="Aberta">Aberta</option>
-                    <option value="Em Andamento">Em Andamento</option>
-                    <option value="Aguardando Peças">Aguardando Peças</option>
-                    <option value="Concluida">Concluída</option>
-                    <option value="Cancelada">Cancelada</option>
-                </select>
+            <select id="ddlFiltroStatus" class="form-control border-0 shadow-none text-muted font-weight-bold p-0" style="font-size: 0.90rem; background: transparent; cursor: pointer;">
+                <option value="">Todos os Status</option>
+                <option value="Aberta">Aberta</option>
+                <option value="Em Andamento">Em Andamento</option>
+                <option value="Aguardando Peças">Aguardando Peças</option>
+                <option value="Concluida">Concluída</option>
+                <option value="Faturada">Faturada (Paga)</option>
+                <option value="Cancelada">Cancelada</option>
+            </select>
             </div>
         </div>
 
@@ -67,17 +68,21 @@
                     <div class="glass-card p-3 mb-4 shadow-sm" style="border-radius: 8px;">
                         <h6 class="font-weight-bold text-uppercase mb-3" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">Dados da Entrada</h6>
                         <div class="row">
-                            <div class="col-md-5 form-group">
+                            <div class="col-md-4 form-group">
                                 <label class="font-weight-bold" style="color: var(--zinc-700);">Cliente <span class="text-danger">*</span></label>
                                 <select class="form-control" style="border-radius: 6px;" id="ddlCliente" required>
                                     <option value="">Carregando...</option>
                                 </select>
                             </div>
-                            <div class="col-md-4 form-group">
+                            <div class="col-md-3 form-group">
                                 <label class="font-weight-bold" style="color: var(--zinc-700);">Veículo <span class="text-danger">*</span></label>
                                 <select class="form-control" style="border-radius: 6px;" id="ddlVeiculo" disabled required>
-                                    <option value="">Selecione o cliente primeiro</option>
+                                    <option value="">Selecione o cliente</option>
                                 </select>
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700);">KM Atual</label>
+                                <input type="number" class="form-control" style="border-radius: 6px;" id="txtKmAtual" placeholder="Ex: 50000">
                             </div>
                             <div class="col-md-3 form-group">
                                 <label class="font-weight-bold" style="color: var(--zinc-700);">Status Atual</label>
@@ -86,6 +91,7 @@
                                     <option value="Em Andamento">Em Andamento</option>
                                     <option value="Aguardando Peças">Aguardando Peças</option>
                                     <option value="Concluida">Concluída</option>
+                                    <option value="Faturada">Faturada (Paga)</option>
                                 </select>
                             </div>
                         </div>
@@ -104,7 +110,7 @@
                     <div class="glass-card p-3 shadow-sm" style="border-radius: 8px;">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h6 class="font-weight-bold text-uppercase m-0" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">Orçamento (Peças e Serviços)</h6>
-                            <button type="button" class="btn btn-sm text-white font-weight-bold" style="background-color: var(--emerald-500); border-radius: 6px;" onclick="adicionarItemOS()">
+                            <button type="button" id="btnAdicionarItemOS" class="btn btn-sm text-white font-weight-bold" style="background-color: var(--emerald-500); border-radius: 6px;" onclick="adicionarItemOS()">
                                 <i class="fas fa-plus"></i> Adicionar Item
                             </button>
                         </div>
@@ -138,7 +144,52 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalFaturarOS" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 12px; border: none;">
+            <div class="modal-header bg-success text-white" style="border-radius: 12px 12px 0 0;">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-hand-holding-usd mr-2"></i> Faturar Ordem de Serviço</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="formFaturarOS">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="txtFaturarOsId">
+
+                    <div class="text-center mb-4">
+                        <p class="text-muted mb-1">Valor Total a Receber</p>
+                        <h2 class="font-weight-bold text-success" id="lblValorFaturar">R$ 0,00</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold text-muted">Como o cliente pagou? *</label>
+                        <select id="ddlFormaPgtoOS" class="form-control shadow-none" required>
+                            <option value="">Selecione...</option>
+                            <option value="PIX">PIX</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold text-muted">Data do Pagamento *</label>
+                        <input type="date" id="txtDataPgtoOS" class="form-control shadow-none" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light font-weight-bold" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success font-weight-bold px-4" id="btnConfirmarFaturamento">
+                        <i class="fas fa-check mr-1"></i> Confirmar e Lançar no Caixa
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="~/js/ordens-servico.js"></script>
+    <script src="~/js/ordens-servico.js" asp-append-version="true"></script>
 }

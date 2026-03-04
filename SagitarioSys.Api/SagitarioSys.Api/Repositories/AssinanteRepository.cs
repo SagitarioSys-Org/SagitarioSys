@@ -21,80 +21,120 @@ namespace SagitarioSys.Api.Repositories
 
             try
             {
-                // 1. Cria a Empresa e pega o ID gerado
+                // 1. Cria a Empresa com TODOS os dados novos
                 var sqlEmpresa = @"
-                    INSERT INTO Empresas (NomeFantasia, CnpjCpf, SegmentoId) 
-                    VALUES (@NomeFantasia, @CnpjCpf, @SegmentoId) 
+                    INSERT INTO Empresas (
+                        NomeFantasia, RazaoSocial, CnpjCpf, InscricaoEstadual, SegmentoId, 
+                        Telefone, EmailContato, Cep, Logradouro, Numero, Complemento, Bairro, Cidade, Uf
+                    ) 
+                    VALUES (
+                        @NomeFantasia, @RazaoSocial, @CnpjCpf, @InscricaoEstadual, @SegmentoId, 
+                        @TelefoneEmpresa, @EmailContatoEmpresa, @Cep, @Logradouro, @Numero, @Complemento, @Bairro, @Cidade, @Uf
+                    ) 
                     RETURNING Id;";
 
                 var empresaId = await connection.QuerySingleAsync<Guid>(sqlEmpresa, request, transaction);
 
-                // 2. Cria o Usuário Administrador vinculado a essa nova empresa
+                // 2. Cria o Usuário Dono passando o Cpf e Telefone dele
                 var sqlUsuario = @"
-                    INSERT INTO Usuarios (EmpresaId, Nome, Email, SenhaHash, Role) 
-                    VALUES (@EmpresaId, @NomeAdmin, @EmailAdmin, @SenhaHash, 'Admin');";
+                    INSERT INTO Usuarios (EmpresaId, Nome, Cpf, Telefone, Email, SenhaHash, Role) 
+                    VALUES (@EmpresaId, @NomeAdmin, @CpfAdmin, @TelefoneAdmin, @EmailAdmin, @SenhaHash, 'Admin');";
 
                 await connection.ExecuteAsync(sqlUsuario, new
                 {
                     EmpresaId = empresaId,
                     NomeAdmin = request.NomeAdmin,
+                    CpfAdmin = request.CpfAdmin,
+                    TelefoneAdmin = request.TelefoneAdmin,
                     EmailAdmin = request.EmailAdmin,
                     SenhaHash = senhaHash
                 }, transaction);
 
-                // Confirma a transação (se der erro em algum, ele desfaz tudo - Rollback automático)
                 transaction.Commit();
                 return true;
             }
             catch
             {
                 transaction.Rollback();
-                throw; // Repassa o erro para o Controller tratar (ex: e-mail já existe)
+                throw;
             }
         }
 
-        // 1. LER TODOS
+        // LER TODOS (Mantém o Join para listar o email na tabela inicial)
         public async Task<IEnumerable<Empresa>> ObterTodosAsync()
         {
             using var connection = _dbFactory.CreateConnection();
             var sql = @"
-                SELECT e.Id, e.NomeFantasia, e.CnpjCpf, e.SegmentoId, e.Ativo, s.Nome as NomeSegmento 
+                SELECT 
+                    e.Id, e.NomeFantasia, e.CnpjCpf, e.SegmentoId, e.Ativo, 
+                    s.Nome as NomeSegmento, 
+                    u.Email as EmailAdmin
                 FROM Empresas e
                 INNER JOIN Segmentos s ON e.SegmentoId = s.Id
-                ORDER BY e.NomeFantasia";
+                LEFT JOIN Usuarios u ON e.Id = u.EmpresaId AND u.Role = 'Admin'
+                ORDER BY e.NomeFantasia;";
+
             return await connection.QueryAsync<Empresa>(sql);
         }
 
-        // 2. LER POR ID (Para quando formos editar e precisarmos preencher o modal)
+        // LER POR ID (Atualizado para buscar os dados de endereço e contatos na hora de editar)
         public async Task<Empresa?> ObterPorIdAsync(Guid id)
         {
             using var connection = _dbFactory.CreateConnection();
-            var sql = "SELECT Id, NomeFantasia, CnpjCpf, SegmentoId, Ativo FROM Empresas WHERE Id = @Id";
+            var sql = @"
+                SELECT 
+                    Id, NomeFantasia, RazaoSocial, CnpjCpf, InscricaoEstadual, SegmentoId, 
+                    Telefone, EmailContato, Cep, Logradouro, Numero, Complemento, Bairro, Cidade, Uf, Ativo 
+                FROM Empresas 
+                WHERE Id = @Id";
             return await connection.QuerySingleOrDefaultAsync<Empresa>(sql, new { Id = id });
         }
 
-        // 3. ATUALIZAR
+        // ATUALIZAR (Atualizado para salvar as alterações do endereço e contato)
         public async Task<bool> AtualizarAsync(Empresa empresa)
         {
             using var connection = _dbFactory.CreateConnection();
             var sql = @"
                 UPDATE Empresas 
                 SET NomeFantasia = @NomeFantasia, 
+                    RazaoSocial = @RazaoSocial,
                     CnpjCpf = @CnpjCpf, 
-                    SegmentoId = @SegmentoId
+                    InscricaoEstadual = @InscricaoEstadual,
+                    SegmentoId = @SegmentoId,
+                    Telefone = @Telefone,
+                    EmailContato = @EmailContato,
+                    Cep = @Cep,
+                    Logradouro = @Logradouro,
+                    Numero = @Numero,
+                    Complemento = @Complemento,
+                    Bairro = @Bairro,
+                    Cidade = @Cidade,
+                    Uf = @Uf
                 WHERE Id = @Id;";
 
             var linhasAfetadas = await connection.ExecuteAsync(sql, empresa);
             return linhasAfetadas > 0;
         }
 
-        // 4. INATIVAR (Soft Delete)
-        public async Task<bool> InativarAsync(Guid id)
+        // ALTERNAR STATUS (O bloqueio/desbloqueio que criamos)
+        public async Task<bool> AlternarStatusAsync(Guid id)
         {
             using var connection = _dbFactory.CreateConnection();
-            var sql = "UPDATE Empresas SET Ativo = FALSE WHERE Id = @Id;";
-
+            var sql = "UPDATE Empresas SET Ativo = NOT Ativo WHERE Id = @Id;";
             var linhasAfetadas = await connection.ExecuteAsync(sql, new { Id = id });
+            return linhasAfetadas > 0;
+        }
+
+        // RESET DE SENHA DO SUPORTE
+        public async Task<bool> ResetarSenhaAdminAsync(Guid empresaId, string novaSenhaHash)
+        {
+            using var connection = _dbFactory.CreateConnection();
+            var sql = @"
+                UPDATE Usuarios 
+                SET SenhaHash = @SenhaHash 
+                WHERE EmpresaId = @EmpresaId AND Role = 'Admin';";
+
+            var linhasAfetadas = await connection.ExecuteAsync(sql, new { SenhaHash = novaSenhaHash, EmpresaId = empresaId });
             return linhasAfetadas > 0;
         }
     }

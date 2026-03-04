@@ -1,0 +1,90 @@
+﻿body {
+    background-color: #525659;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+}
+
+/* Formato de Folha A4 no navegador */
+.a4-container {
+    width: 210mm;
+    min-height: 297mm;
+    background: #fff;
+    margin: 20px auto;
+    padding: 20mm;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+
+/* Regras para quando a pessoa clicar em "Imprimir" */
+@media print {
+    body {
+        background-color: #fff;
+    }
+
+    .a4-container {
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        width: 100%;
+        min-height: auto;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+    /* Esconde botões na impressão */
+}
+
+.header-os {
+    border-bottom: 3px solid #343a40;
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+}
+
+.section-title {
+    background-color: #f4f6f9;
+    font-weight: bold;
+    padding: 6px 12px;
+    border-left: 5px solid #007bff;
+    margin-top: 25px;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.box-info {
+    border: 1px solid #dee2e6;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+}
+
+    .box-info span {
+        display: block;
+    }
+
+    .box-info strong {
+        color: #495057;
+    }
+
+.table-itens th {
+    background-color: #343a40;
+    color: white;
+    border: none;
+    font-size: 0.85rem;
+}
+
+.table-itens td {
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+.assinatura-box {
+    text-align: center;
+    margin-top: 60px;
+}
+
+.linha-assinatura {
+    border-top: 1px solid #000;
+    width: 80%;
+    margin: 0 auto 5px;
+}

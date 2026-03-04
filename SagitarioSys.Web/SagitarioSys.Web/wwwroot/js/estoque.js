@@ -17,12 +17,6 @@ $(document).ready(function () {
     });
 });
 
-$.ajaxSetup({
-    beforeSend: function (xhr) {
-        var token = localStorage.getItem("jwt_token");
-        if (token) xhr.setRequestHeader("Authorization", "Bearer " + token);
-    }
-});
 
 function carregarPecas() {
     $.ajax({

@@ -34,7 +34,19 @@ namespace SagitarioSys.Api.Repositories
         public async Task<OrdemServico?> ObterPorIdAsync(Guid id, Guid empresaId)
         {
             using var connection = _dbFactory.CreateConnection();
-            var sqlOS = "SELECT * FROM OrdensServico WHERE Id = @Id AND EmpresaId = @EmpresaId;";
+
+            // Query segura: Usando apenas Nome, Placa e Modelo, que já sabemos que funcionam!
+            var sqlOS = @"
+                SELECT 
+                    o.*, 
+                    c.Nome AS NomeCliente, 
+                    v.Placa AS PlacaVeiculo, 
+                    v.Modelo AS ModeloVeiculo
+                FROM OrdensServico o
+                INNER JOIN Clientes c ON o.ClienteId = c.Id
+                INNER JOIN Veiculos v ON o.VeiculoId = v.Id
+                WHERE o.Id = @Id AND o.EmpresaId = @EmpresaId;";
+
             var os = await connection.QuerySingleOrDefaultAsync<OrdemServico>(sqlOS, new { Id = id, EmpresaId = empresaId });
 
             if (os != null)
@@ -69,8 +81,8 @@ namespace SagitarioSys.Api.Repositories
             try
             {
                 var sqlOS = @"
-                    INSERT INTO OrdensServico (EmpresaId, ClienteId, VeiculoId, Status, RelatoCliente, ObservacoesInternas, ValorTotal) 
-                    VALUES (@EmpresaId, @ClienteId, @VeiculoId, @Status, @RelatoCliente, @ObservacoesInternas, @ValorTotal) 
+                    INSERT INTO OrdensServico (EmpresaId, ClienteId, VeiculoId, Status, RelatoCliente, ObservacoesInternas, ValorTotal, KmAtual) 
+                    VALUES (@EmpresaId, @ClienteId, @VeiculoId, @Status, @RelatoCliente, @ObservacoesInternas, @ValorTotal, @KmAtual) 
                     RETURNING Id;";
 
                 var id = await connection.QuerySingleAsync<Guid>(sqlOS, os, transaction);
@@ -129,7 +141,7 @@ namespace SagitarioSys.Api.Repositories
                     UPDATE OrdensServico 
                     SET ClienteId = @ClienteId, VeiculoId = @VeiculoId, Status = @Status, 
                         RelatoCliente = @RelatoCliente, ObservacoesInternas = @ObservacoesInternas, 
-                        ValorTotal = @ValorTotal, DataConclusao = @DataConclusao
+                        ValorTotal = @ValorTotal, DataConclusao = @DataConclusao, KmAtual = @KmAtual
                     WHERE Id = @Id AND EmpresaId = @EmpresaId;";
 
                 var linhas = await connection.ExecuteAsync(sqlOS, os, transaction);
@@ -183,6 +195,13 @@ namespace SagitarioSys.Api.Repositories
             var sql = "UPDATE OrdensServico SET Status = 'Cancelada' WHERE Id = @Id AND EmpresaId = @EmpresaId;";
             var linhas = await connection.ExecuteAsync(sql, new { Id = id, EmpresaId = empresaId });
             return linhas > 0;
+        }
+ 
+        public async Task<bool> AtualizarStatusAsync(Guid id, Guid empresaId, string status)
+        {
+            using var connection = _dbFactory.CreateConnection();
+            var sql = "UPDATE OrdensServico SET Status = @Status WHERE Id = @Id AND EmpresaId = @EmpresaId;";
+            return await connection.ExecuteAsync(sql, new { Status = status, Id = id, EmpresaId = empresaId }) > 0;
         }
     }
 }

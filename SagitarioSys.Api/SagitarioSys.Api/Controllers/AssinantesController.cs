@@ -62,19 +62,38 @@ namespace SagitarioSys.Api.Controllers
             return NoContent(); // 204 No Content (Sucesso sem corpo de resposta)
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        [HttpPatch("{id}/status")]
+        public async Task<IActionResult> ToggleStatus(Guid id)
         {
-            // Proteção extra: Não deixa você inativar a própria Matriz (Sagitario Sys)
+            // Proteção extra: Não deixa bloquear a própria Matriz (Sagitario Sys)
             if (id.ToString() == "11111111-1111-1111-1111-111111111111")
             {
-                return BadRequest(new { message = "Você não pode inativar a empresa matriz do sistema." });
+                return BadRequest(new { message = "Você não pode bloquear a empresa matriz do sistema." });
             }
 
-            var sucesso = await _repository.InativarAsync(id);
+            var sucesso = await _repository.AlternarStatusAsync(id);
             if (!sucesso) return NotFound(new { message = "Empresa não encontrada." });
 
-            return Ok(new { message = "Empresa inativada com sucesso." });
+            return Ok(new { message = "Status da assinatura alterado com sucesso." });
+        }
+
+        [HttpPost("{id}/reset-senha")]
+        public async Task<IActionResult> ResetarSenhaProvisoria(Guid id, [FromBody] ResetSenhaRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.NovaSenha) || request.NovaSenha.Length < 6)
+            {
+                return BadRequest(new { message = "A senha provisória deve ter pelo menos 6 caracteres." });
+            }
+
+            // Criptografa a senha provisória antes de salvar (Segurança sempre!)
+            string senhaCriptografada = BCrypt.Net.BCrypt.HashPassword(request.NovaSenha);
+
+            var sucesso = await _repository.ResetarSenhaAdminAsync(id, senhaCriptografada);
+
+            if (!sucesso)
+                return NotFound(new { message = "Nenhum usuário administrador encontrado para esta empresa." });
+
+            return Ok(new { message = "Senha provisória definida com sucesso! Avise o cliente." });
         }
     }
 }

@@ -5,13 +5,17 @@
 }
 
 // ==========================================
-// 🛡️ INJETA O TOKEN EM TODAS AS REQUISIÇÕES
+// 🛡️ INJETA O TOKEN APENAS NA NOSSA API
 // ==========================================
 $.ajaxSetup({
-    beforeSend: function (xhr) {
-        var token = localStorage.getItem("jwt_token");
-        if (token) {
-            xhr.setRequestHeader("Authorization", "Bearer " + token);
+    beforeSend: function (xhr, settings) {
+        // Verifica se a requisição está a ir para a nossa própria API ou se é uma rota local.
+        // Se for para um site externo (como DataTables ou ViaCEP), não envia o Token!
+        if (settings.url.indexOf("http") === -1 || settings.url.indexOf(_url) !== -1) {
+            var token = localStorage.getItem("jwt_token");
+            if (token) {
+                xhr.setRequestHeader("Authorization", "Bearer " + token);
+            }
         }
     }
 });

@@ -13,15 +13,6 @@
     carregarDadosDashboardGestao();
 });
 
-$.ajaxSetup({
-    beforeSend: function (xhr) {
-        // Ignora a injeção do token JWT do sistema para APIs públicas de clima/frases
-        if (!this.url.includes("open-meteo") && !this.url.includes("docapi.dev") && !this.url.includes("rss2json") && !this.url.includes("bigdatacloud")) {
-            var token = localStorage.getItem("jwt_token");
-            if (token) xhr.setRequestHeader("Authorization", "Bearer " + token);
-        }
-    }
-});
 
 // ==========================================
 // 🚀 BLOCO DE GESTÃO: FINANCEIRO, ESTOQUE E O.S. (NOVO)
