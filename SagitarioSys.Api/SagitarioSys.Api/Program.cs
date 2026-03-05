@@ -1,6 +1,7 @@
-using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using SagitarioSys.Api.Data;
 using SagitarioSys.Api.Repositories;
 using System.Text;
@@ -9,13 +10,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("PermitirTudo", policy =>
+    options.AddPolicy("PermitirFront", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader();
+        policy.WithOrigins(
+            "https://localhost:44372",        // Front em desenvolvimento
+            "https://www.sagitariosys.com.br" // Front em produção
+        )
+        .AllowAnyMethod()
+        .AllowAnyHeader();
     });
 });
+
 
 // 1. Configurar a Injeção de Dependência da nossa conexão com o banco
 builder.Services.AddSingleton<IDbConnectionFactory, PgSqlConnectionFactory>();
@@ -25,9 +30,24 @@ builder.Services.AddScoped<AssinanteRepository>();
 builder.Services.AddScoped<SegmentoRepository>();
 builder.Services.AddScoped<MenuRepository>();
 builder.Services.AddScoped<VeiculoRepository>();
+builder.Services.AddScoped<OrdemServicoRepository>();
+builder.Services.AddScoped<PecaRepository>();
+builder.Services.AddScoped<FinanceiroRepository>();
+builder.Services.AddScoped<CategoriaFinanceiraRepository>();
 
 // 2. Adicionar os Controllers
 builder.Services.AddControllers();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("login", opt =>
+    {
+        opt.PermitLimit = 5;           // máximo 5 tentativas
+        opt.Window = TimeSpan.FromMinutes(1); // por minuto
+        opt.QueueLimit = 0;
+    });
+    options.RejectionStatusCode = 429; // Too Many Requests
+});
 
 // 3. Configurar a Autenticação JWT
 var jwtKey = builder.Configuration["JwtSettings:SecurityKey"];
@@ -40,7 +60,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
-    options.RequireHttpsMetadata = false; // Mude para true em produção
+    options.RequireHttpsMetadata = !builder.Environment.IsDevelopment();
     options.SaveToken = true;
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -99,11 +119,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.UseCors("PermitirTudo");
+app.UseCors("PermitirFront");
 
 // Importante: A ordem aqui importa! Autenticação sempre antes de Autorização.
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 
 app.MapControllers();
 

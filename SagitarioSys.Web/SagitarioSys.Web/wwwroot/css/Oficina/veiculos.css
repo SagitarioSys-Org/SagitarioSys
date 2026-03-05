@@ -1,0 +1,36 @@
+﻿/* ==========================================
+   NOVO: ESTILIZAÇÃO DA PLACA (PADRÃO MERCOSUL)
+   ========================================== */
+
+/* 1. Estilo para o Input do Modal */
+.plate-input {
+    text-transform: uppercase !important; /* Força caixa alta na digitação */
+    font-family: 'JetBrains Mono', monospace !important; /* Fonte monoespaçada */
+    font-size: 1.2rem !important; /* Letra maior */
+    font-weight: 700 !important;
+    letter-spacing: 2px; /* Espaçamento entre letras */
+    text-align: center;
+    /* O Fundo Estilizado */
+    background-color: white !important;
+    border: 2px solid #000 !important; /* Borda preta fina */
+    border-radius: 6px !important;
+    padding-top: 10px !important; /* Espaço para a faixa azul */
+    position: relative;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* 2. Estilo para o Badge na Tabela Principal */
+.plate-badge {
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    background-color: white;
+    color: #000;
+    border: 1px solid #000;
+    border-radius: 4px;
+    padding: 3px 8px;
+    display: inline-block;
+    box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}

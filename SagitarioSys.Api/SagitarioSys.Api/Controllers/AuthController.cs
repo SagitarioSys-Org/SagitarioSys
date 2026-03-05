@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.IdentityModel.Tokens;
 using SagitarioSys.Api.Repositories;
 using System.IdentityModel.Tokens.Jwt;
@@ -24,9 +26,10 @@ namespace SagitarioSys.Api.Controllers
         {
             public string Email { get; set; } = string.Empty;
             public string Senha { get; set; } = string.Empty;
-        }
+        } 
 
         [HttpPost("login")]
+        [EnableRateLimiting("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var usuario = await _repository.ObterUsuarioPorEmailAsync(request.Email);
@@ -62,8 +65,16 @@ namespace SagitarioSys.Api.Controllers
                 Token = jwtStr,
                 Usuario = usuario.Nome,
                 Empresa = usuario.NomeFantasia,
-                Tipo = usuario.TipoNegocio
+                Tipo = usuario.TipoNegocio,
+                RotaDashboard = usuario.RotaDashboard
             });
+        }
+
+        [HttpGet("validar")]
+        [Authorize]
+        public IActionResult Validar()
+        {
+            return Ok(new { valid = true });
         }
     }
 }

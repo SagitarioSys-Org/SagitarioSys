@@ -1,0 +1,33 @@
+﻿@{
+    ViewData["Title"] = "Carregando...";
+}
+
+<div class="d-flex justify-content-center align-items-center" style="height: 70vh;">
+    <div class="text-center text-muted">
+        <i class="fas fa-circle-notch fa-spin fa-3x mb-3 text-emerald-500"></i>
+        <h5>Preparando seu ambiente...</h5>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Pega a rota que foi salva no momento do login
+            const rotaDestino = localStorage.getItem("user_rota_dashboard");
+
+            // Se existir uma rota válida, redireciona imediatamente
+            if (rotaDestino && rotaDestino !== "null" && rotaDestino !== "undefined" && rotaDestino !== "") {
+                window.location.replace(rotaDestino);
+            }
+            else {
+                // Prevenção: se a rota não estiver no banco, exibe alerta
+                console.warn("Rota de Dashboard não definida.");
+                Swal.fire({
+                    title: 'Aviso',
+                    text: 'O painel deste segmento não foi configurado no banco de dados.',
+                    icon: 'warning'
+                });
+            }
+        });
+    </script>
+}

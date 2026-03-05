@@ -1,22 +1,173 @@
-html {
-  font-size: 14px;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* 2. DEFINIÇÃO DAS CORES TAILWIND (Paleta Zinc e Emerald) */
+:root {
+    --zinc-50: #fafafa;
+    --zinc-200: #e4e4e7;
+    --zinc-400: #a1a1aa;
+    --zinc-800: #27272a;
+    --zinc-900: #18181b;
+    --zinc-950: #09090b;
+    --emerald-500: #10b981; /* O verde do ícone ativo */
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
+/* 3. APLICANDO O @layer base (Fundo claro e Fonte Inter) */
 body {
-  margin-bottom: 60px;
+    font-family: ui-sans-serif, system-ui, sans-serif !important;
+    background-color: var(--zinc-50) !important;
+    color: var(--zinc-900) !important;
+}
+
+/* Garante que o fundo principal do AdminLTE pegue a cor zinc-50 */
+.content-wrapper {
+    background-color: var(--zinc-50) !important;
+}
+
+/* Para códigos ou textos monoespaçados, usamos a JetBrains */
+code, pre {
+    font-family: 'JetBrains Mono', monospace !important;
+}
+
+/* 4. A CLASSE .glass-card EXATAMENTE COMO ELES FIZERAM */
+.glass-card {
+    background-color: rgba(255, 255, 255, 0.8) !important; /* bg-white/80 */
+    backdrop-filter: blur(12px) !important; /* backdrop-blur-md */
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--zinc-200) !important; /* border border-zinc-200 */
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important; /* shadow-sm */
+    border-radius: 0.75rem !important;
+}
+
+/* ==========================================
+   5. BARRA LATERAL (Padrão Premium)
+   ========================================== */
+.main-sidebar, .brand-link {
+    background-color: var(--zinc-950) !important;
+    border-right: 1px solid var(--zinc-900) !important;
+}
+
+/* Título de seção (Ex: CADASTROS) */
+.nav-header {
+    color: white !important;
+    font-size: 0.75rem !important; /* Letra menor */
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-left: 1.25rem !important;
+    margin-top: 1rem;
+    
+}
+
+/* Menus Principais (Inativos) */
+.sidebar .nav-link {
+    color: var(--zinc-400) !important;
+    border-radius: 0.5rem !important; /* 8px */
+    margin-bottom: 0.25rem !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 0.875rem !important; /* Letra menor (14px) */
+    font-weight: 500;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+    /* Ícones perfeitamente alinhados */
+    .sidebar .nav-link i.nav-icon {
+        color: var(--zinc-400) !important;
+        font-size: 1.1rem !important;
+        width: 1.5rem; /* Trava a largura para alinhar os textos */
+        text-align: center;
+        margin-right: 0.5rem !important;
+    }
+
+    /* Hover (Quando passa o mouse) */
+    .sidebar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: var(--zinc-50) !important;
+    }
+
+/* Menu Ativo (O "Botão" Clicado) */
+.sidebar .nav-item.menu-open > .nav-link,
+.sidebar .nav-pills .nav-link.active {
+    background-color: var(--zinc-800) !important;
+    color: var(--zinc-50) !important;
+    font-weight: 600;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important; /* Sombra sutil */
+}
+
+    /* O Verde Esmeralda no Ícone Ativo */
+    .sidebar .nav-pills .nav-link.active i.nav-icon,
+    .sidebar .nav-item.menu-open > .nav-link i.nav-icon {
+        color: var(--emerald-500) !important;
+    }
+
+/* ==========================================
+   6. SUB-MENUS (A linha guia criativa)
+   ========================================== */
+.nav-treeview {
+    margin-left: 1.25rem; /* Empurra os filhos para a direita */
+    padding-left: 0.5rem;
+    border-left: 1px solid var(--zinc-800); /* A LINHA VERTICAL! */
+    margin-top: 0.25rem;
+}
+
+    .nav-treeview .nav-link {
+        font-size: 0.8125rem !important; /* Ainda menor (13px) */
+        padding: 0.4rem 1rem !important;
+        color: var(--zinc-400) !important;
+    }
+
+        .nav-treeview .nav-link i.nav-icon {
+            font-size: 0.9rem !important; /* Ícone filho um pouco menor */
+        }
+
+/* Rodapé do Menu */
+.sidebar-footer {
+    border-top: 1px solid var(--zinc-800);
+}
+
+/* ==========================================
+   7. RESPONSIVIDADE E MENU COLAPSADO (FECHADO)
+   ========================================== */
+
+/* Quando o menu encolhe, esconde o título principal */
+body.sidebar-collapse .brand-text {
+    display: none !important;
+}
+
+/* Esconde o nome e cargo do usuário no rodapé */
+body.sidebar-collapse .sidebar-footer .info-usuario-texto {
+    display: none !important;
+}
+
+/* Esconde o texto "SAIR DO SISTEMA" e deixa só o ícone */
+body.sidebar-collapse .sidebar-footer .btn-texto {
+    display: none !important;
+}
+
+/* Ajusta o padding e margens do botão de sair para ficar quadradinho */
+body.sidebar-collapse .sidebar-footer .btn-outline-danger {
+    padding: 0.5rem !important;
+    justify-content: center !important;
+}
+
+    body.sidebar-collapse .sidebar-footer .btn-outline-danger i {
+        margin: 0 !important;
+        font-size: 1.2rem;
+    }
+
+/* Centraliza a bolinha do Avatar perfeitamente */
+body.sidebar-collapse .sidebar-footer .d-flex {
+    justify-content: center !important;
+}
+
+body.sidebar-collapse .sidebar-footer .avatar-box {
+    margin: 0 auto !important;
+}
+
+/* No celular, a Navbar Superior não pode ter bordas estranhas */
+@media (max-width: 768px) {
+    .main-sidebar {
+        box-shadow: 4px 0 10px rgba(0,0,0,0.5) !important;
+    }
 }
