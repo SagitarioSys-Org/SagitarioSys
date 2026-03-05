@@ -1,0 +1,119 @@
+﻿@{
+    ViewData["Title"] = "Gestão de Veículos";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<link rel="stylesheet" href="~/css/Oficina/veiculos.css" />
+
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Veículos</h2>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">Controle da frota e histórico dos clientes.</p>
+    </div>
+    <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
+        <i class="fas fa-plus mr-2"></i> Novo Veículo
+    </button>
+</div>
+
+<div class="glass-card p-0 overflow-hidden mb-4">
+    <div class="p-3 border-bottom d-flex align-items-center bg-white">
+        <i class="fas fa-search text-muted mr-3 pl-2"></i>
+        <input type="text" id="txtBusca" class="form-control border-0 shadow-none p-0" placeholder="Buscar por placa, modelo ou cliente..." style="font-size: 0.95rem; background: transparent;">
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover align-middle m-0" id="tbVeiculos">
+            <thead style="border-bottom: 2px solid var(--zinc-100);">
+                <tr style="color: var(--zinc-400); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+                    <th class="pl-4 py-3">Placa</th>
+                    <th class="py-3">Veículo</th>
+                    <th class="py-3">Ano / Cor</th>
+                    <th class="py-3">Cliente (Dono)</th>
+                    <th class="py-3 text-center" width="100">Ações</th>
+                </tr>
+            </thead>
+            <tbody style="color: var(--zinc-800); font-size: 0.9rem;">
+                <tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando veículos...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalVeiculo" tabindex="-1" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header d-flex justify-content-between align-items-center" style="background-color: var(--zinc-900); color: var(--zinc-50);">
+                <h5 class="modal-title font-weight-bold" id="modalTitle"><i class="fas fa-car mr-2 text-emerald-500"></i> Ficha do Veículo</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+
+            <form id="formVeiculo">
+                <div class="modal-body bg-white p-4">
+                    <input type="hidden" id="txtId" />
+
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Proprietário (Cliente) <span class="text-danger">*</span></label>
+                            <select class="form-control" style="border-radius: 6px; border-color: var(--zinc-300);" id="ddlCliente" required>
+                                <option value="">Carregando clientes...</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Placa <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control plate-input" id="txtPlaca" required placeholder="ABC1C34" maxlength="8">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Marca <span class="text-danger">*</span></label>
+                            <select class="form-control" style="border-radius: 6px;" id="ddlMarca" required>
+                                <option value="">Selecione a Marca</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Modelo <span class="text-danger">*</span></label>
+                            <select class="form-control" style="border-radius: 6px;" id="ddlModelo" required disabled>
+                                <option value="">Selecione a marca primeiro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Ano / Modelo <span class="text-danger">*</span></label>
+                            <select class="form-control" style="border-radius: 6px;" id="ddlAno" required disabled>
+                                <option value="">Aguardando...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Cor</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtCor" placeholder="Ex: Prata">
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">KM Atual</label>
+                            <input type="number" class="form-control font-weight-bold text-primary" style="border-radius: 6px;" id="txtKm" placeholder="0" min="0">
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Observações</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtObs" placeholder="Ex: Arranhão na porta">
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer" style="background-color: var(--zinc-50); border-top: 1px solid var(--zinc-200);">
+                    <button type="button" class="btn btn-outline-secondary font-weight-bold" data-dismiss="modal" style="border-radius: 6px;">Cancelar</button>
+                    <button type="submit" class="btn text-white font-weight-bold px-4" id="btnSalvar" style="background-color: var(--emerald-500); border-radius: 6px;">
+                        Salvar Veículo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/Oficina/veiculos.js"></script>
+}

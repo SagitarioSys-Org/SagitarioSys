@@ -1,16 +1,29 @@
-﻿
-$(document).ready(function () {
-    // Se já estiver logado, manda pro Dashboard direto
-    if (localStorage.getItem("jwt_token")) {
-        window.location.href = "/Home/Index";
-        return;
+﻿$(document).ready(function () {
+    var token = localStorage.getItem("jwt_token");
+
+    if (token) {
+        $.ajax({
+            url: _url + "api/Auth/validar",
+            type: "GET",
+            headers: { "Authorization": "Bearer " + token },
+            success: function () {
+                var rotaSalva = localStorage.getItem("user_rota_dashboard") || "/Admin/Home/DashboardAdmin";
+                window.location.href = rotaSalva;
+            },
+            error: function () {
+                localStorage.clear();
+                sessionStorage.clear();
+            }
+        });
     }
 
+    // Sempre registra o submit, independente do token
     $("#formLogin").on("submit", function (e) {
         e.preventDefault();
         fazerLogin();
     });
 });
+
 
 function fazerLogin() {
     var email = $("#txtEmail").val();
@@ -32,13 +45,14 @@ function fazerLogin() {
             localStorage.setItem("user_nome", response.usuario);
             localStorage.setItem("user_empresa", response.empresa);
             localStorage.setItem("user_tipo", response.tipo);
-         
+
+            // ✨ GUARDA A ROTA CORRETA
             localStorage.setItem("user_rota_dashboard", response.rotaDashboard);
 
-            // Redireciona com um pequeno delay para ficar elegante
             $btn.removeClass("btn-primary").addClass("btn-success").html('<i class="fas fa-check"></i> Sucesso! Redirecionando...');
             setTimeout(function () {
-                window.location.href = "/Home/Index";
+                // ✨ REDIRECIONA PARA A ROTA CORRETA DA ÁREA
+                window.location.href = response.rotaDashboard;
             }, 1000);
         },
         error: function (xhr) {

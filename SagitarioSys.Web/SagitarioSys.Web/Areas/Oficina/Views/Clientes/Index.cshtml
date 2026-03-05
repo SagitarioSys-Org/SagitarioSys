@@ -1,0 +1,141 @@
+﻿@{
+    ViewData["Title"] = "Gestão de Clientes";
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Clientes</h2>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">Gerencie sua base de clientes e contatos.</p>
+    </div>
+    <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
+        <i class="fas fa-plus mr-2"></i> Novo Cliente
+    </button>
+</div>
+
+<div class="glass-card p-0 overflow-hidden mb-4">
+    <div class="p-3 border-bottom d-flex align-items-center bg-white">
+        <i class="fas fa-search text-muted mr-3 pl-2"></i>
+        <input type="text" id="txtBusca" class="form-control border-0 shadow-none p-0" placeholder="Buscar por nome, CPF/CNPJ ou cidade..." style="font-size: 0.95rem; background: transparent;">
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover align-middle m-0" id="tbClientes">
+            <thead style="border-bottom: 2px solid var(--zinc-100);">
+                <tr style="color: var(--zinc-400); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+                    <th class="pl-4 py-3">Nome</th>
+                    <th class="py-3">CPF / CNPJ</th>
+                    <th class="py-3">Cidade/UF</th>
+                    <th class="py-3 text-center">Contatos Salvos</th>
+                    <th class="py-3 text-center" width="100">Ações</th>
+                </tr>
+            </thead>
+            <tbody style="color: var(--zinc-800); font-size: 0.9rem;">
+                <tr><td colspan="5" class="text-center py-5"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando clientes...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCliente" tabindex="-1" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+
+            <div class="modal-header d-flex justify-content-between align-items-center" style="background-color: var(--zinc-900); color: var(--zinc-50);">
+                <h5 class="modal-title font-weight-bold" id="modalTitle">
+                    <i class="fas fa-user-plus mr-2 text-emerald-500"></i> Novo Cliente
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" style="opacity: 0.8;">&times;</button>
+            </div>
+
+            <form id="formCliente">
+                <div class="modal-body" style="background-color: var(--zinc-50); padding: 1.5rem;">
+                    <input type="hidden" id="txtId" />
+
+                    <div class="glass-card p-3 mb-4 shadow-sm" style="border-radius: 8px;">
+                        <h6 class="font-weight-bold text-uppercase mb-3" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">Dados Principais</h6>
+                        <div class="row">
+                            <div class="col-md-8 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Nome Completo / Razão Social <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtNome" required placeholder="Ex: João da Silva">
+                            </div>
+                            <div class="col-md-4 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">CPF / CNPJ</label>
+                                <input type="text" class="form-control font-weight-bold text-primary" style="border-radius: 6px; letter-spacing: 1px;" id="txtCpfCnpj" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-3 mb-4 shadow-sm" style="border-radius: 8px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                            <h6 class="font-weight-bold text-uppercase m-0" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">Meios de Contato</h6>
+                            <button type="button" class="btn btn-sm text-white font-weight-bold shadow-sm" style="background-color: var(--emerald-500); border-radius: 6px;" onclick="adicionarContato()">
+                                <i class="fas fa-plus mr-1"></i> Adicionar Mais
+                            </button>
+                        </div>
+
+                        <div class="row font-weight-bold pb-2 mb-2 text-muted" style="font-size: 0.8rem;">
+                            <div class="col-md-3">Telefone/Celular</div>
+                            <div class="col-md-4">E-mail</div>
+                            <div class="col-md-4">Observação (Ex: Recado)</div>
+                        </div>
+
+                        <div id="boxContatos">
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-3 shadow-sm" style="border-radius: 8px;">
+                        <h6 class="font-weight-bold text-uppercase mb-3" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">Endereço</h6>
+                        <div class="row">
+                            <div class="col-md-3 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">CEP</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" style="border-radius: 6px 0 0 6px;" id="txtCep" placeholder="00000-000">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-secondary" type="button" style="border-radius: 0 6px 6px 0;" onclick="buscarCep()"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Logradouro (Rua/Av)</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtLogradouro">
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Número</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtNumero">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Bairro</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtBairro">
+                            </div>
+                            <div class="col-md-5 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Cidade</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtCidade">
+                            </div>
+                            <div class="col-md-2 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">UF</label>
+                                <input type="text" class="form-control" style="border-radius: 6px; text-transform: uppercase;" id="txtUf" maxlength="2">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer" style="background-color: var(--zinc-100); border-top: 1px solid var(--zinc-200);">
+                    <button type="button" class="btn btn-outline-secondary font-weight-bold" data-dismiss="modal" style="border-radius: 6px;">Cancelar</button>
+                    <button type="submit" class="btn text-white font-weight-bold px-4" id="btnSalvar" style="background-color: var(--emerald-500); border-radius: 6px;">
+                        Salvar Cliente
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/Oficina/clientes.js"></script>
+}

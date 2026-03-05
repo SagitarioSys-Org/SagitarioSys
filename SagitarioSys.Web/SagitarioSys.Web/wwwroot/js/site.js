@@ -1,6 +1,7 @@
-﻿if (window.location.pathname.toLowerCase().indexOf("/home/login") === -1) {
+﻿// 1. VERIFICAÇÃO DE ROTA DE LOGIN
+if (window.location.pathname.toLowerCase().indexOf("/admin/home/login") === -1) {
     if (!localStorage.getItem("jwt_token")) {
-        window.location.href = "/Home/Login";
+        window.location.href = "/Admin/Home/Login";
     }
 }
 
@@ -9,8 +10,6 @@
 // ==========================================
 $.ajaxSetup({
     beforeSend: function (xhr, settings) {
-        // Verifica se a requisição está a ir para a nossa própria API ou se é uma rota local.
-        // Se for para um site externo (como DataTables ou ViaCEP), não envia o Token!
         if (settings.url.indexOf("http") === -1 || settings.url.indexOf(_url) !== -1) {
             var token = localStorage.getItem("jwt_token");
             if (token) {
@@ -25,15 +24,23 @@ $.ajaxSetup({
 // ==========================================
 $(document).ajaxError(function (event, jqxhr, settings, thrownError) {
     if (jqxhr.status === 401) {
-        console.warn("Sessão expirada! Redirecionando para a tela de login...");
         localStorage.clear();
         sessionStorage.clear();
-        window.location.href = "/Home/Login";
+        Swal.fire({
+            title: 'Sessão Expirada',
+            text: 'Sua sessão expirou. Faça login novamente.',
+            icon: 'warning',
+            confirmButtonText: 'OK'
+        }).then(() => {
+            window.location.href = "/Admin/Home/Login";
+        });
     }
 });
 
+
 $(document).ready(function () {
-    if (window.location.pathname.toLowerCase().indexOf("/home/login") !== -1) {
+    // Evita rodar a lógica de menu se estiver na tela de login
+    if (window.location.pathname.toLowerCase().indexOf("/admin/home/login") !== -1) {
         return;
     }
 
@@ -52,7 +59,7 @@ $(document).ready(function () {
 function sairSistema() {
     localStorage.clear();
     sessionStorage.clear();
-    window.location.href = "/Home/Login";
+    window.location.href = "/Admin/Home/Login";
 }
 
 // ==========================================
@@ -61,13 +68,11 @@ function sairSistema() {
 function renderizarMenuDinamico(nomeSegmento) {
     const $menuContainer = $("#menuDinamico");
 
-    // 1. TENTA LER O MENU DA MEMÓRIA INSTANTÂNEA
     const menuCache = sessionStorage.getItem("menu_html_cache");
 
     if (menuCache) {
         $menuContainer.html(menuCache);
         marcarMenuAtivo();
-        // LINHA REMOVIDA AQUI: O AdminLTE já escuta os cliques naturalmente!
         return;
     }
 
@@ -130,12 +135,9 @@ function renderizarMenuDinamico(nomeSegmento) {
                 }
             });
 
-            // SALVA NA MEMÓRIA PARA AS PRÓXIMAS TELAS!
             sessionStorage.setItem("menu_html_cache", menuHtml);
-
             $menuContainer.html(menuHtml);
             marcarMenuAtivo();
-            // LINHA REMOVIDA AQUI TAMBÉM!
         },
         error: function () {
             $menuContainer.html('<li class="nav-item"><a href="#" class="nav-link text-danger"><i class="fas fa-exclamation-triangle nav-icon"></i><p>Erro nos menus</p></a></li>');
@@ -155,19 +157,13 @@ function marcarMenuAtivo() {
         var href = $(this).attr("href");
 
         if (href && href !== "#" && pathAtual.includes(href.toLowerCase())) {
-
-            // 1. Marca o link atual de verde
             $(this).addClass("active");
 
-            // 2. Acha a "pasta pai"
             var $menuPai = $(this).closest(".has-treeview");
 
             if ($menuPai.length > 0) {
-                // 3. Adiciona as classes do AdminLTE
                 $menuPai.addClass("menu-open");
                 $menuPai.children("a.nav-link").addClass("active");
-
-                // 4. Força a visualização no CSS para a animação de fechar poder ler a altura real
                 $menuPai.children(".nav-treeview").css("display", "block");
             }
         }

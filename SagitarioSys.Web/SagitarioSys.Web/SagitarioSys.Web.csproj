@@ -4,10 +4,22 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>e178c07b-2222-483c-9ab6-9c33ba6b43d8</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="wwwroot\css\Imprimir.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Areas\Clinica\Controllers\" />
+    <Folder Include="Areas\PetShop\Controllers\" />
+    <Folder Include="wwwroot\css\Admin\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
   </ItemGroup>
 
 </Project>

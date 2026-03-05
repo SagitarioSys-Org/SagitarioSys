@@ -23,3 +23,15 @@ node_modules/
 
 # VS Code
 .vscode/
+
+# Segredos e configurações sensíveis
+appsettings.Development.json
+secrets.json
+
+# Publicação
+**/publish/
+*.pfx
+*.p12
+
+# Nginx (contém certificados SSL)
+nginx/certs/
