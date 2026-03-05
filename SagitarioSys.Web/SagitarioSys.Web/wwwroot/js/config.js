@@ -2,7 +2,7 @@
 // 🌍 CONFIGURAÇÃO GLOBAL DE AMBIENTE
 // ==========================================
 // Troque para "PROD" quando for publicar o sistema no servidor oficial!
-const AMBIENTE_ATUAL = "DEV";
+const AMBIENTE_ATUAL = "PROD";
 
 function GetUrl() {
     if (AMBIENTE_ATUAL === "DEV") {
