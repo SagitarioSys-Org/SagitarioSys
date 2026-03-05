@@ -27,4 +27,5 @@ RUN dotnet publish "./SagitarioSys.Web.csproj" -c $BUILD_CONFIGURATION -o /app/p
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+RUN cp /app/publish/wwwroot/js/config.prod.js /app/publish/wwwroot/js/config.js
 ENTRYPOINT ["dotnet", "SagitarioSys.Web.dll"]
