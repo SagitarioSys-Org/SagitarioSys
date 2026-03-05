@@ -33,8 +33,5 @@ secrets.json
 *.pfx
 *.p12
 
-# Docker (contém senhas e credenciais)
-docker-compose.yml
-
 # Nginx (contém certificados SSL)
 nginx/certs/
