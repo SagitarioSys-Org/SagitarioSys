@@ -35,3 +35,5 @@ secrets.json
 
 # Nginx (contém certificados SSL)
 nginx/certs/
+
+**/wwwroot/js/config.js
