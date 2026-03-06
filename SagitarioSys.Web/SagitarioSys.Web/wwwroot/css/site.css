@@ -171,3 +171,49 @@ body.sidebar-collapse .sidebar-footer .avatar-box {
         box-shadow: 4px 0 10px rgba(0,0,0,0.5) !important;
     }
 }
+
+/* ========================================
+   LOGO SIDEBAR — EXPANDIDO / COLAPSADO
+   ======================================== */
+
+/* Logo expandida */
+.logo-icon {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    flex-shrink: 0;
+    margin-right: 10px;
+    transition: all 0.3s ease;
+}
+
+.logo-texto {
+    font-size: 1.5rem;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.2s ease;
+}
+
+/* Quando o menu está colapsado (sidebar-mini + corpo sem sidebar-open) */
+.sidebar-mini.sidebar-collapse .logo-icon {
+    width: 36px;
+    margin-right: 0;
+}
+
+.sidebar-mini.sidebar-collapse .logo-texto {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+/* Centraliza o ícone quando colapsado */
+.sidebar-mini.sidebar-collapse .brand-link {
+    justify-content: center !important;
+    padding: 10px 5px !important;
+}
+
+/* Esconde o user-panel quando colapsado */
+.sidebar-mini.sidebar-collapse .user-panel .info {
+    display: none !important;
+}

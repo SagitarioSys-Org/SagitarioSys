@@ -65,7 +65,7 @@ $.ajaxSetup({
 });
 
 function carregarClientes() {
-    $.get(_url + "api/Clientes", function (dados) {
+    $.get(_url + "api/Oficina/Clientes", function (dados) {
         var html = '<option value="">Selecione o proprietário...</option>';
         dados.forEach(c => {
        
@@ -90,7 +90,7 @@ function carregarMarcasFipe() {
 
 function carregarVeiculos() {
     $.ajax({
-        url: _url + "api/Veiculos",
+        url: _url + "api/Oficina/Veiculos",
         type: "GET",
         success: function (dados) {
             var html = "";
@@ -166,7 +166,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${_url}api/Veiculos/${id}` : _url + "api/Veiculos",
+        url: isEdicao ? `${_url}api/Oficina/Veiculos/${id}` : _url + "api/Veiculos",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -185,7 +185,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${_url}api/Veiculos/${id}`, function (v) {
+    $.get(`${_url}api/Oficina/Veiculos/${id}`, function (v) {
         $("#txtId").val(v.id);
         $("#ddlCliente").val(v.clienteId);
 
@@ -222,7 +222,7 @@ function deletar(id, placa) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${_url}api/Veiculos/${id}`,
+                url: `${_url}api/Oficina/Veiculos/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire({ title: 'Removido!', icon: 'success', timer: 1500, showConfirmButton: false });

@@ -56,18 +56,18 @@ function filtrarOS() {
 // ==========================================
 function carregarListasAuxiliares() {
     // Busca Clientes
-    $.get(_url + "api/Clientes", function (dados) {
+    $.get(_url + "api/Oficina/Clientes", function (dados) {
         var html = '<option value="">Selecione o Cliente...</option>';
         dados.forEach(c => html += `<option value="${c.id}">${c.nome}</option>`);
         $("#ddlCliente").html(html);
     });
 
     // Busca Veículos e guarda na memória
-    $.get(_url + "api/Veiculos", function (dados) {
+    $.get(_url + "api/Oficina/Veiculos", function (dados) {
         listaTodosVeiculos = dados;
     });
 
-    $.get(_url + "api/Estoque", function (dados) {
+    $.get(_url + "api/Oficina/Estoque", function (dados) {
         listaEstoque = dados;
     });
 }
@@ -203,7 +203,7 @@ function formatarMoeda(valor) {
 // ==========================================
 function carregarOrdens() {
     $.ajax({
-        url: _url + "api/OrdensServico",
+        url: _url + "api/Oficina/OrdensServico",
         type: "GET",
         success: function (dados) {
             var html = "";
@@ -319,7 +319,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${_url}api/OrdensServico/${id}` : _url + "api/OrdensServico",
+        url: isEdicao ? `${_url}api/Oficina/OrdensServico/${id}` : _url + "api/Oficina/OrdensServico",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -352,7 +352,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${_url}api/OrdensServico/${id}`, function (os) {
+    $.get(`${_url}api/Oficina/OrdensServico/${id}`, function (os) {
         $("#txtId").val(os.id);
         $("#ddlCliente").val(os.clienteId);
 
@@ -412,7 +412,7 @@ function deletar(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${_url}api/OrdensServico/${id}`,
+                url: `${_url}api/Oficina/OrdensServico/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire({ title: 'Cancelada!', icon: 'success', timer: 1500, showConfirmButton: false });
@@ -457,7 +457,7 @@ function confirmarFaturamento() {
 
     $.ajax({
         // A rota que criámos no backend!
-        url: _url + `api/OrdensServico/${idOS}/faturar`,
+        url: _url + `api/Oficina/OrdensServico/${idOS}/faturar`,
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),

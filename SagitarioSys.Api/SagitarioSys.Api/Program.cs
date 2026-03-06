@@ -4,6 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SagitarioSys.Api.Data;
 using SagitarioSys.Api.Repositories;
+using SagitarioSys.Api.Repositories.Admin;
+using SagitarioSys.Api.Repositories.Oficina;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);

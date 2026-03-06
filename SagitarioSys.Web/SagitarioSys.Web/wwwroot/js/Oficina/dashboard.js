@@ -19,8 +19,8 @@
 // ==========================================
 function carregarDadosDashboardGestao() {
     $.when(
-        $.get(_url + "api/OrdensServico"),
-        $.get(_url + "api/Estoque")
+        $.get(_url + "api/Oficina/OrdensServico"),
+        $.get(_url + "api/Oficina/Estoque")
     ).done(function (osResponse, estoqueResponse) {
 
         const ordens = osResponse[0];

@@ -1,4 +1,4 @@
-﻿const API_CATEGORIAS = _url + "api/CategoriasFinanceiras";
+﻿const API_CATEGORIAS = _url + "api/Oficina/CategoriasFinanceiras";
 
 $(document).ready(function () {
     carregarCategorias();
