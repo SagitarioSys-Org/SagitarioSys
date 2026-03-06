@@ -11,6 +11,43 @@
     </button>
 </div>
 
+
+<div class="glass-card p-3 mb-4">
+    <div class="row align-items-end">
+        <div class="col-md-3 form-group mb-0">
+            <label class="font-weight-bold text-muted" style="font-size:0.85rem;">Data Inicial</label>
+            <input type="date" class="form-control" id="dtInicio" style="border-radius:6px;">
+        </div>
+        <div class="col-md-3 form-group mb-0">
+            <label class="font-weight-bold text-muted" style="font-size:0.85rem;">Data Final</label>
+            <input type="date" class="form-control" id="dtFim" style="border-radius:6px;">
+        </div>
+        <div class="col-md-3 form-group mb-0">
+            <label class="font-weight-bold text-muted" style="font-size:0.85rem;">Filtrar por</label>
+            <div class="btn-group w-100" id="toggleFiltroData" role="group">
+                <button type="button" class="btn btn-sm font-weight-bold active" id="btnFiltroVencimento"
+                        style="border-radius: 6px 0 0 6px; background-color: var(--zinc-900); color: white; border: none;"
+                        onclick="alternarFiltroPor('vencimento')">
+                    <i class="fas fa-calendar-alt mr-1"></i> Vencimento
+                </button>
+                <button type="button" class="btn btn-sm font-weight-bold" id="btnFiltroPagamento"
+                        style="border-radius: 0 6px 6px 0; background-color: var(--zinc-200); color: var(--zinc-700); border: none;"
+                        onclick="alternarFiltroPor('pagamento')">
+                    <i class="fas fa-check-circle mr-1"></i> Pagamento
+                </button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <button class="btn font-weight-bold px-4 w-100" id="btnFiltrar"
+                    style="background-color: var(--emerald-500); color:white; border-radius:6px;"
+                    onclick="carregarLancamentos()">
+                <i class="fas fa-search mr-1"></i> Filtrar
+            </button>
+        </div>
+    </div>
+</div>
+
+
 <div class="row mb-4">
     <div class="col-md-4">
         <div class="glass-card p-4" style="border-bottom: 4px solid #10b981;">
@@ -37,7 +74,7 @@
         <table class="table table-borderless table-hover align-middle m-0" id="tbFinanceiro">
             <thead class="bg-light text-muted" style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
                 <tr>
-                    <th class="pl-4 py-3">Vencimento</th>
+                    <th class="pl-4 py-3" id="thDataColuna">Vencimento</th>
                     <th class="py-3">Descrição / Categoria</th>
                     <th class="py-3">Tipo</th>
                     <th class="py-3">Status</th>

@@ -81,7 +81,9 @@ function filtrarVeiculos(clienteId, veiculoSelecionadoId = null) {
     }
 
     // Filtra no JS os veículos que pertencem ao cliente escolhido
-    var veiculosDoCliente = listaTodosVeiculos.filter(v => v.clienteId === clienteId);
+    var veiculosDoCliente = listaTodosVeiculos.filter(v =>
+        String(v.clienteId).toLowerCase() === String(clienteId).toLowerCase()
+    );
 
     var html = '<option value="">Selecione o Veículo...</option>';
     veiculosDoCliente.forEach(v => {

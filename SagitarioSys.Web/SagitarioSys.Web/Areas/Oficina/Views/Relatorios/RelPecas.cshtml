@@ -1,0 +1,109 @@
+﻿
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">
+            <i class="fas fa-cogs mr-2"></i> Peças Mais Vendidas
+        </h2>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">Ranking de peças utilizadas nas OS faturadas.</p>
+    </div>
+    <a href="/Oficina/Relatorios/ImprimirPecas" id="btnImprimir" target="_blank"
+       class="btn font-weight-bold px-3 py-2 shadow-sm"
+       style="background-color: var(--zinc-900); color: white; border-radius: 8px;">
+        <i class="fas fa-print mr-2"></i> Imprimir
+    </a>
+</div>
+
+@* {{!-- Filtro --}} *@
+<div class="glass-card p-3 mb-4">
+    <div class="row align-items-end">
+        <div class="col-md-3 form-group mb-0">
+            <label class="font-weight-bold text-muted" style="font-size:0.85rem;">Data Inicial</label>
+            <input type="date" class="form-control" id="dtInicio" style="border-radius:6px;">
+        </div>
+        <div class="col-md-3 form-group mb-0">
+            <label class="font-weight-bold text-muted" style="font-size:0.85rem;">Data Final</label>
+            <input type="date" class="form-control" id="dtFim" style="border-radius:6px;">
+        </div>
+        <div class="col-md-2">
+            <button class="btn font-weight-bold px-4 w-100" id="btnFiltrar"
+                    style="background-color: var(--zinc-900); color:white; border-radius:6px;"
+                    onclick="carregarPecas()">
+                <i class="fas fa-search mr-2"></i> Filtrar
+            </button>
+        </div>
+    </div>
+</div>
+
+@* {{!-- KPIs --}} *@
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="glass-card p-3 text-center shadow-sm">
+            <div class="text-muted" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Tipos de Peça</div>
+            <div class="font-weight-bold mt-1" style="font-size:2rem;" id="kpiTipos">-</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card p-3 text-center shadow-sm">
+            <div class="text-muted" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Unidades Vendidas</div>
+            <div class="font-weight-bold text-primary mt-1" style="font-size:2rem;" id="kpiUnidades">-</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card p-3 text-center shadow-sm">
+            <div class="text-muted" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Total Faturado</div>
+            <div class="font-weight-bold text-success mt-1" style="font-size:1.5rem;" id="kpiFaturado">-</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card p-3 text-center shadow-sm">
+            <div class="text-muted" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Lucro em Peças</div>
+            <div class="font-weight-bold text-warning mt-1" style="font-size:1.5rem;" id="kpiLucro">-</div>
+        </div>
+    </div>
+</div>
+
+@* {{!-- Gráfico --}} *@
+<div class="glass-card p-4 mb-4 shadow-sm">
+    <h6 class="font-weight-bold text-uppercase mb-3" style="color:var(--zinc-500); font-size:0.8rem; letter-spacing:1px;">
+        Top 10 Peças por Quantidade Vendida
+    </h6>
+    <div style="max-height: 280px;">
+        <canvas id="graficoPecas"></canvas>
+    </div>
+</div>
+
+@* {{!-- Tabela --}} *@
+<div class="glass-card p-0 overflow-hidden">
+    <div class="p-3 border-bottom bg-white">
+        <h6 class="font-weight-bold m-0 text-uppercase" style="color:var(--zinc-500); font-size:0.8rem; letter-spacing:1px;">
+            <i class="fas fa-list mr-2"></i> Ranking Completo
+        </h6>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle m-0" id="tbPecas">
+            <thead style="background-color: var(--zinc-100); color: var(--zinc-600); font-size: 0.82rem; text-transform: uppercase;">
+                <tr>
+                    <th class="pl-4" width="50">#</th>
+                    <th>Peça</th>
+                    <th class="text-center">Qtd Vendida</th>
+                    <th class="text-right">Custo Unit.</th>
+                    <th class="text-right">Preço Médio</th>
+                    <th class="text-right">Total Custo</th>
+                    <th class="text-right">Total Faturado</th>
+                    <th class="text-right pr-4">Lucro</th>
+                </tr>
+            </thead>
+            <tbody style="font-size:0.9rem;">
+                <tr><td colspan="8" class="text-center py-4 text-muted">Selecione o período e clique em Filtrar.</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="~/js/Oficina/rel-pecas.js" asp-append-version="true"></script>
+}

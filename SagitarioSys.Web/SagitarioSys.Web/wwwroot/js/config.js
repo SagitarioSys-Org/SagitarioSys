@@ -7,4 +7,3 @@ function GetUrl() {
     }
 }
 const _url = GetUrl();
-Url();
