@@ -81,7 +81,7 @@ function renderizarMenuDinamico(nomeSegmento) {
     if (!nomeSegmento) return;
 
     $.ajax({
-        url: `${_url}api/Menus/meus-menus?segmento=${encodeURIComponent(nomeSegmento)}`,
+        url: `${_url}api/Admin/Menus/meus-menus?segmento=${encodeURIComponent(nomeSegmento)}`,
         type: "GET",
         headers: { "Authorization": "Bearer " + localStorage.getItem("jwt_token") },
         success: function (menus) {

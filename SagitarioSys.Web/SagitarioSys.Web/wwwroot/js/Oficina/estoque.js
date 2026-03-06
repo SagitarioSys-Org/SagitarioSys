@@ -20,7 +20,7 @@ $(document).ready(function () {
 
 function carregarPecas() {
     $.ajax({
-        url: _url + "api/Estoque",
+        url: _url + "api/Oficina/Estoque",
         type: "GET",
         success: function (dados) {
             listaPecas = dados;
@@ -117,7 +117,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${_url}api/Estoque/${id}` : _url + "api/Estoque",
+        url: isEdicao ? `${_url}api/Oficina/Estoque/${id}` : _url + "api/Oficina/Estoque",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -136,7 +136,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${_url}api/Estoque/${id}`, function (p) {
+    $.get(`${_url}api/Oficina/Estoque/${id}`, function (p) {
         $("#txtId").val(p.id);
         $("#txtNome").val(p.nome);
         $("#txtSku").val(p.sku);
@@ -161,7 +161,7 @@ function deletar(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${_url}api/Estoque/${id}`,
+                url: `${_url}api/Oficina/Estoque/${id}`,
                 type: "DELETE",
                 success: function () {
                     carregarPecas();

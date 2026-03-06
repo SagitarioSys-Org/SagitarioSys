@@ -18,7 +18,7 @@
 // ==========================================
 function carregarSegmentos() {
     $.ajax({
-        url: _url + "api/Segmentos/ativos",
+        url: _url + "api/Admin/Segmentos/ativos",
         type: "GET",
         success: function (dados) {
             var html = '<option value="">Selecione...</option>';
@@ -32,7 +32,7 @@ function carregarSegmentos() {
 
 function carregarAssinantes() {
     $.ajax({
-        url: _url + "api/Assinantes",
+        url: _url + "api/Admin/Assinantes",
         type: "GET",
         success: function (dados) {
             // Destrói a tabela velha para recriar
@@ -109,7 +109,7 @@ function salvarAssinante() {
     var id = $("#txtEmpresaId").val();
     var isEdicao = id !== "";
     var metodo = isEdicao ? "PUT" : "POST";
-    var url = isEdicao ? `${_url}api/Assinantes/${id}` : _url + "api/Assinantes";
+    var url = isEdicao ? `${_url}api/Admin/Assinantes/${id}` : _url + "api/Admin/Assinantes";
 
     // Puxamos os dados comuns a ambos (Novo e Edição)
     var dados = {
@@ -171,7 +171,7 @@ function salvarAssinante() {
 function editar(id) {
     $("#formAssinante")[0].reset();
     $.ajax({
-        url: `${_url}api/Assinantes/${id}`,
+        url: `${_url}api/Admin/Assinantes/${id}`,
         type: "GET",
         success: function (empresa) {
             $("#txtEmpresaId").val(empresa.id);
@@ -227,7 +227,7 @@ function alternarStatus(id, nome, estaAtivo) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${_url}api/Assinantes/${id}/status`,
+                url: `${_url}api/Admin/Assinantes/${id}/status`,
                 type: "PATCH",
                 success: function (resposta) {
                     Swal.fire({
@@ -263,7 +263,7 @@ function salvarNovaSenha() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Alterando...');
 
     $.ajax({
-        url: `${_url}api/Assinantes/${idEmpresa}/reset-senha`,
+        url: `${_url}api/Admin/Assinantes/${idEmpresa}/reset-senha`,
         type: "POST",
         contentType: "application/json",
         data: JSON.stringify({ novaSenha: novaSenha }),

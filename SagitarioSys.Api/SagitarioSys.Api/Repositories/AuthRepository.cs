@@ -1,6 +1,6 @@
 ﻿using Dapper;
 using SagitarioSys.Api.Data;
-using SagitarioSys.Api.Models;
+using SagitarioSys.Api.Models.Admin;
 
 namespace SagitarioSys.Api.Repositories
 {

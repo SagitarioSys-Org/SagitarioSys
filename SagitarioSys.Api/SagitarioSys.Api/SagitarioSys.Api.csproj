@@ -18,4 +18,13 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\Clinica\" />
+    <Folder Include="Controllers\PetShop\" />
+    <Folder Include="Models\Clinica\" />
+    <Folder Include="Models\PetShop\" />
+    <Folder Include="Repositories\Clinica\" />
+    <Folder Include="Repositories\PetShop\" />
+  </ItemGroup>
+
 </Project>

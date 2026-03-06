@@ -43,14 +43,14 @@ $.ajaxSetup({
 // Preenche os dois <select> do Modal
 function carregarListasAuxiliares() {
     // 1. Carrega os Segmentos
-    $.get(_url + "api/Segmentos", function (dados) {
+    $.get(_url + "api/Admin/Segmentos", function (dados) {
         var html = '<option value="">Selecione o Segmento...</option>';
         dados.forEach(seg => html += `<option value="${seg.id}">${seg.nome}</option>`);
         $("#ddlSegmento").html(html);
     });
 
     // 2. Carrega as Empresas (Assinantes)
-    $.get(_url + "api/Assinantes", function (dados) {
+    $.get(_url + "api/Admin/Assinantes", function (dados) {
         var html = '<option value="">Não (Menu Global para o segmento)</option>';
         dados.forEach(emp => html += `<option value="${emp.id}">${emp.nomeFantasia} (CNPJ: ${emp.cnpjCpf})</option>`);
         $("#ddlEmpresa").html(html);
@@ -62,7 +62,7 @@ var todosOsMenus = []; // Variável global para guardar a lista
 
 function carregarMenus() {
     $.ajax({
-        url: _url + "api/Menus",
+        url: _url + "api/Admin/Menus",
         type: "GET",
         success: function (dados) {
             todosOsMenus = dados; // Guarda para usarmos no modal
@@ -152,7 +152,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${_url}api/Menus/${id}` : _url + "api/Menus",
+        url: isEdicao ? `${_url}api/Admin/Menus/${id}` : _url + "api/Admin/Menus",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
