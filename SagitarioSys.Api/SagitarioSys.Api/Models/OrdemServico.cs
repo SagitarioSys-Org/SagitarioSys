@@ -20,6 +20,10 @@
         public string PlacaVeiculo { get; set; } = string.Empty;
         public string ModeloVeiculo { get; set; } = string.Empty;
 
+        public string? ClienteCpfCnpj { get; set; }
+        public string? ClienteTelefone { get; set; }
+        public string? MarcaVeiculo { get; set; }
+
         // A Mochila de Itens (Peças e Serviços)
         public List<OrdemServicoItem> Itens { get; set; } = new List<OrdemServicoItem>();
     }

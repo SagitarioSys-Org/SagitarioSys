@@ -34,6 +34,9 @@ builder.Services.AddScoped<OrdemServicoRepository>();
 builder.Services.AddScoped<PecaRepository>();
 builder.Services.AddScoped<FinanceiroRepository>();
 builder.Services.AddScoped<CategoriaFinanceiraRepository>();
+builder.Services.AddScoped<ProntuarioRepository>();
+builder.Services.AddScoped<RelatoriosRepository>();
+
 
 // 2. Adicionar os Controllers
 builder.Services.AddControllers();

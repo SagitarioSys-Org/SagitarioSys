@@ -1,0 +1,57 @@
+﻿body {
+    background: #f1f1f1;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.a4-container {
+    width: 210mm;
+    margin: 0 auto 30px auto;
+    background: white;
+    padding: 15mm;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.section-title {
+    background: #1a1a1a;
+    color: white;
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 3px;
+    margin-bottom: 10px;
+}
+
+.badge-critico {
+    background: #dc3545;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.badge-normal {
+    background: #28a745;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+@@media print {
+    body {
+        background: white;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .a4-container {
+        box-shadow: none;
+        margin: 0;
+        padding: 10mm;
+        width: 100%;
+    }
+}
