@@ -10,7 +10,7 @@
     }
 
     $.ajax({
-        url: `${_url}api/Relatorios/lucrorial?dataInicio=${dtInicio}&dataFim=${dtFim}`,
+        url: `${_url}api/Oficina/Relatorios/lucrorial?dataInicio=${dtInicio}&dataFim=${dtFim}`,
         type: "GET",
         headers: { "Authorization": "Bearer " + token },
         success: function (data) { montarRelatorio(data, dtInicio, dtFim); },

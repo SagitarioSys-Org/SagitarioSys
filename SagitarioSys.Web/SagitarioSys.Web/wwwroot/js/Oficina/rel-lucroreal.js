@@ -26,7 +26,7 @@ function carregarLucro() {
     $("#btnImprimir").attr("href", `/Oficina/Relatorios/ImprimirLucroReal?dtInicio=${dtInicio}&dtFim=${dtFim}`);
 
     $.ajax({
-        url: `${_url}api/Relatorios/lucrorial?dataInicio=${dtInicio}&dataFim=${dtFim}`,
+        url: `${_url}api/Oficina/Relatorios/lucrorial?dataInicio=${dtInicio}&dataFim=${dtFim}`,
         type: "GET",
         success: function (data) {
             montarKpis(data);

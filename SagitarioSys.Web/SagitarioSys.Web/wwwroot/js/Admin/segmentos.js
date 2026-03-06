@@ -17,7 +17,7 @@ $.ajaxSetup({
 
 function carregarSegmentos() {
     $.ajax({
-        url: _url + "api/Segmentos",
+        url: _url + "api/Admin/Segmentos",
         type: "GET",
         success: function (dados) {
             var html = "";
@@ -60,7 +60,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${_url}api/Segmentos/${id}` : _url + "api/Segmentos",
+        url: isEdicao ? `${_url}api/Admin/Segmentos/${id}` : _url + "api/Admin/Segmentos",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -79,7 +79,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${_url}/api/Segmentos/${id}`, function (seg) {
+    $.get(`${_url}/api/Admin/Segmentos/${id}`, function (seg) {
         $("#txtId").val(seg.id);
         $("#txtNome").val(seg.nome);
         $("#chkAtivo").prop("checked", seg.ativo);
@@ -100,7 +100,7 @@ function deletar(id) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${_url}api/Segmentos/${id}`,
+                url: `${_url}api/Admin/Segmentos/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire({ title: 'Inativado!', icon: 'success', timer: 1500, showConfirmButton: false });

@@ -26,7 +26,7 @@ function carregarPecas() {
     $("#btnImprimir").attr("href", `/Oficina/Relatorios/ImprimirPecas?dtInicio=${dtInicio}&dtFim=${dtFim}`);
 
     $.ajax({
-        url: `${_url}api/Relatorios/pecas?dataInicio=${dtInicio}&dataFim=${dtFim}`,
+        url: `${_url}api/Oficina/Relatorios/pecas?dataInicio=${dtInicio}&dataFim=${dtFim}`,
         type: "GET",
         success: function (dados) {
             montarKpis(dados);
