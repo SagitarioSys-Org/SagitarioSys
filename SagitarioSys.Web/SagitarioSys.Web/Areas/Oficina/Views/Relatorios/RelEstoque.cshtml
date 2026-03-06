@@ -1,0 +1,106 @@
+﻿
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<link rel="stylesheet" href="~/css/Oficina/relatorios.css" />
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">
+            <i class="fas fa-boxes mr-2"></i> Estoque Atualizado
+        </h2>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">Situação atual de todas as peças em estoque.</p>
+    </div>
+    <a href="/Oficina/Relatorios/ImprimirEstoque" target="_blank"
+       class="btn font-weight-bold px-3 py-2 shadow-sm"
+       style="background-color: var(--zinc-900); color: white; border-radius: 8px;">
+        <i class="fas fa-print mr-2"></i> Imprimir
+    </a>
+
+</div>
+
+<div class="row mb-4" id="boxKpis">
+    <div class="col-md-3">
+        <div class="glass-card p-3 text-center shadow-sm">
+            <div class="text-muted" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Total de Itens</div>
+            <div class="font-weight-bold mt-1" style="font-size:2rem;" id="kpiTotalItens">-</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card p-3 text-center shadow-sm">
+            <div class="text-muted" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Valor em Estoque (Custo)</div>
+            <div class="font-weight-bold text-primary mt-1" style="font-size:1.5rem;" id="kpiValorCusto">-</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card p-3 text-center shadow-sm">
+            <div class="text-muted" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Valor em Estoque (Venda)</div>
+            <div class="font-weight-bold text-success mt-1" style="font-size:1.5rem;" id="kpiValorVenda">-</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="glass-card p-3 text-center shadow-sm">
+            <div class="text-muted" style="font-size:0.8rem; text-transform:uppercase; letter-spacing:1px;">Itens Abaixo do Mínimo</div>
+            <div class="font-weight-bold text-danger mt-1" style="font-size:2rem;" id="kpiEstoqueCritico">-</div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-7">
+        <div class="glass-card p-4 shadow-sm">
+            <h6 class="font-weight-bold text-uppercase mb-3" style="color:var(--zinc-500); font-size:0.8rem; letter-spacing:1px;">
+                Top 10 Peças por Quantidade
+            </h6>
+            <div style="max-height: 220px;">
+                <canvas id="graficoEstoque"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="glass-card p-4 shadow-sm">
+            <h6 class="font-weight-bold text-uppercase mb-3" style="color:var(--zinc-500); font-size:0.8rem; letter-spacing:1px;">
+                Situação do Estoque
+            </h6>
+            <div style="max-height: 220px;">
+                <canvas id="graficoPizza"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="glass-card p-0 overflow-hidden">
+    <div class="p-3 border-bottom bg-white d-flex align-items-center justify-content-between">
+        <h6 class="font-weight-bold m-0 text-uppercase" style="color:var(--zinc-500); font-size:0.8rem; letter-spacing:1px;">
+            <i class="fas fa-list mr-2"></i> Lista Completa
+        </h6>
+        <input type="text" id="txtFiltro" class="form-control border-0 shadow-none"
+               placeholder="Filtrar por nome ou SKU..." style="max-width:280px; font-size:0.9rem;">
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle m-0" id="tbEstoque">
+            <thead style="background-color: var(--zinc-100); color: var(--zinc-600); font-size: 0.82rem; text-transform: uppercase;">
+                <tr>
+                    <th class="pl-4">Nome da Peça</th>
+                    <th>SKU</th>
+                    <th>Fornecedor</th>
+                    <th class="text-right">Custo</th>
+                    <th class="text-right">Preço Venda</th>
+                    <th class="text-right">Margem</th>
+                    <th class="text-center">Qtd</th>
+                    <th class="text-center">Mínimo</th>
+                    <th class="text-center">Situação</th>
+                </tr>
+            </thead>
+            <tbody style="color: var(--zinc-800); font-size:0.9rem;">
+                <tr><td colspan="9" class="text-center py-4"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="~/js/Oficina/rel-estoque.js" asp-append-version="true"></script>
+}

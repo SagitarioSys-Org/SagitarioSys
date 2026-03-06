@@ -17,16 +17,33 @@ namespace SagitarioSys.Api.Repositories
         {
             using var connection = _dbFactory.CreateConnection();
             var sql = @"
-                SELECT 
-                    o.*, 
-                    c.Nome AS NomeCliente, 
-                    v.Placa AS PlacaVeiculo, 
-                    v.Modelo AS ModeloVeiculo
-                FROM OrdensServico o
-                INNER JOIN Clientes c ON o.ClienteId = c.Id
-                INNER JOIN Veiculos v ON o.VeiculoId = v.Id
-                WHERE o.EmpresaId = @EmpresaId
-                ORDER BY o.NumeroOS DESC;";
+                       SELECT 
+                           o.id,
+                           o.empresaid,
+                           o.clienteid,
+                           o.veiculoid,
+                           o.numeroos,
+                           o.status,
+                           o.relatocliente,
+                           o.observacoesinternas,
+                           o.valortotal,
+                           o.dataabertura,
+                           o.dataconclusao,
+                           o.kmatual,
+                           c.nome        AS nomecliente,
+                           c.cpfcnpj     AS clientecpfcnpj,
+                           (SELECT cc.contato FROM contatoscliente cc 
+                            WHERE cc.clienteid = c.id 
+                            ORDER BY cc.id 
+                            LIMIT 1)     AS clientetelefone,
+                           v.placa       AS placaveiculo,
+                           v.modelo      AS modeloveiculo,
+                           v.marca       AS marcaveiculo
+                       FROM ordensservico o
+                       INNER JOIN clientes c ON o.clienteid = c.id
+                       INNER JOIN veiculos v ON o.veiculoid = v.id
+                       WHERE o.empresaid = @EmpresaId
+                       ORDER BY o.numeroos DESC;";
 
             return await connection.QueryAsync<OrdemServico>(sql, new { EmpresaId = empresaId });
         }
@@ -35,28 +52,45 @@ namespace SagitarioSys.Api.Repositories
         {
             using var connection = _dbFactory.CreateConnection();
 
-            // Query segura: Usando apenas Nome, Placa e Modelo, que já sabemos que funcionam!
             var sqlOS = @"
-                SELECT 
-                    o.*, 
-                    c.Nome AS NomeCliente, 
-                    v.Placa AS PlacaVeiculo, 
-                    v.Modelo AS ModeloVeiculo
-                FROM OrdensServico o
-                INNER JOIN Clientes c ON o.ClienteId = c.Id
-                INNER JOIN Veiculos v ON o.VeiculoId = v.Id
-                WHERE o.Id = @Id AND o.EmpresaId = @EmpresaId;";
+                        SELECT 
+                            o.id,
+                            o.empresaid,
+                            o.clienteid,
+                            o.veiculoid,
+                            o.numeroos,
+                            o.status,
+                            o.relatocliente,
+                            o.observacoesinternas,
+                            o.valortotal,
+                            o.dataabertura,
+                            o.dataconclusao,
+                            o.kmatual,
+                            c.nome        AS nomecliente,
+                            c.cpfcnpj     AS clientecpfcnpj,
+                            (SELECT cc.contato FROM contatoscliente cc 
+                             WHERE cc.clienteid = c.id 
+                             ORDER BY cc.id 
+                             LIMIT 1)     AS clientetelefone,
+                            v.placa       AS placaveiculo,
+                            v.modelo      AS modeloveiculo,
+                            v.marca       AS marcaveiculo
+                        FROM ordensservico o
+                        INNER JOIN clientes c ON o.clienteid = c.id
+                        INNER JOIN veiculos v ON o.veiculoid = v.id
+                        WHERE o.id = @Id AND o.empresaid = @EmpresaId;";
 
             var os = await connection.QuerySingleOrDefaultAsync<OrdemServico>(sqlOS, new { Id = id, EmpresaId = empresaId });
 
             if (os != null)
             {
-                var sqlItens = "SELECT * FROM OrdemServicoItens WHERE OrdemServicoId = @Id";
+                var sqlItens = "SELECT * FROM ordemservicoitens WHERE ordemservicoid = @Id";
                 os.Itens = (await connection.QueryAsync<OrdemServicoItem>(sqlItens, new { Id = id })).ToList();
             }
 
             return os;
         }
+
 
         public async Task<Guid> CriarAsync(OrdemServico os)
         {

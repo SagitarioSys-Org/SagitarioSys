@@ -38,9 +38,17 @@ namespace SagitarioSys.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var os = await _repository.ObterPorIdAsync(id, EmpresaIdLogada);
-            if (os == null) return NotFound();
-            return Ok(os);
+            try
+            {
+                var os = await _repository.ObterPorIdAsync(id, EmpresaIdLogada);
+                if (os == null) return NotFound();
+                return Ok(os);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = ex.Message, detalhe = ex.InnerException?.Message });
+            }
+           
         }
 
         [HttpPost]
