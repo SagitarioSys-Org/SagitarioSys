@@ -2,9 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SagitarioSys.Api.Models;
 using SagitarioSys.Api.Repositories;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SagitarioSys.Api.Controllers
 {
@@ -22,28 +19,34 @@ namespace SagitarioSys.Api.Controllers
 
         private Guid ObterEmpresaIdDoToken()
         {
-            var claimEmpresa = User.Claims.FirstOrDefault(c => c.Type == "EmpresaId");
-            if (claimEmpresa == null || string.IsNullOrEmpty(claimEmpresa.Value))
+            var claim = User.Claims.FirstOrDefault(c => c.Type == "EmpresaId");
+            if (claim == null || string.IsNullOrEmpty(claim.Value))
                 throw new UnauthorizedAccessException("Empresa não identificada no token.");
-
-            return Guid.Parse(claimEmpresa.Value);
+            return Guid.Parse(claim.Value);
         }
 
         [HttpGet]
-        public async Task<IActionResult> ObterTodos()
+        public async Task<IActionResult> ObterTodos(
+            [FromQuery] string dataInicio,
+            [FromQuery] string dataFim,
+            [FromQuery] string filtroPor = "vencimento") // ✅ padrão é vencimento
         {
             try
             {
                 var empresaId = ObterEmpresaIdDoToken();
-                var lancamentos = await _repository.ObterTodosAsync(empresaId);
+
+                var dtInicio = DateTime.TryParse(dataInicio, out var di) ? di : new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                var dtFim = DateTime.TryParse(dataFim, out var df) ? df : new DateTime(DateTime.Now.Year, DateTime.Now.Month + 1, 1).AddDays(-1);
+
+                var lancamentos = await _repository.ObterTodosAsync(empresaId, dtInicio, dtFim, filtroPor);
                 return Ok(lancamentos);
             }
             catch (Exception ex)
             {
-                // Agora o erro vai aparecer mastigado no console/network do navegador!
-                return StatusCode(500, new { message = "Erro interno ao buscar lançamentos: " + ex.Message });
+                return StatusCode(500, new { message = "Erro ao buscar lançamentos: " + ex.Message });
             }
         }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> ObterPorId(Guid id)
@@ -52,52 +55,78 @@ namespace SagitarioSys.Api.Controllers
             {
                 var empresaId = ObterEmpresaIdDoToken();
                 var lancamento = await _repository.ObterPorIdAsync(id, empresaId);
-
-                if (lancamento == null)
-                    return NotFound(new { message = "Lançamento não encontrado." });
-
+                if (lancamento == null) return NotFound(new { message = "Lançamento não encontrado." });
                 return Ok(lancamento);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Erro interno ao buscar o lançamento: " + ex.Message });
+                return StatusCode(500, new { message = "Erro ao buscar lançamento: " + ex.Message });
             }
         }
 
         [HttpPost]
         public async Task<IActionResult> Adicionar([FromBody] LancamentoFinanceiro lancamento)
         {
-            lancamento.EmpresaId = ObterEmpresaIdDoToken();
-
-            // Agora chamamos o CriarAsync que retorna o novo ID
-            var novoId = await _repository.CriarAsync(lancamento);
-
-            if (novoId == Guid.Empty) return BadRequest(new { message = "Erro ao registrar o lançamento." });
-
-            return Ok(new { message = "Lançamento registrado com sucesso!", id = novoId });
+            try
+            {
+                lancamento.EmpresaId = ObterEmpresaIdDoToken();
+                var novoId = await _repository.CriarAsync(lancamento);
+                if (novoId == Guid.Empty) return BadRequest(new { message = "Erro ao registrar o lançamento." });
+                return Ok(new { message = "Lançamento registrado com sucesso!", id = novoId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro ao criar lançamento: " + ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Atualizar(Guid id, [FromBody] LancamentoFinanceiro lancamento)
         {
-            lancamento.Id = id;
-            lancamento.EmpresaId = ObterEmpresaIdDoToken(); // Trava de segurança
-
-            var sucesso = await _repository.AtualizarAsync(lancamento);
-            if (!sucesso) return BadRequest(new { message = "Erro ao atualizar o lançamento ou acesso negado." });
-
-            return Ok(new { message = "Lançamento atualizado com sucesso!" });
+            try
+            {
+                lancamento.Id = id;
+                lancamento.EmpresaId = ObterEmpresaIdDoToken();
+                var (sucesso, mensagem) = await _repository.AtualizarAsync(lancamento);
+                if (!sucesso) return BadRequest(new { message = mensagem });
+                return Ok(new { message = mensagem });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro ao atualizar: " + ex.Message });
+            }
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Deletar(Guid id)
         {
-            var empresaId = ObterEmpresaIdDoToken();
-            var sucesso = await _repository.DeletarAsync(id, empresaId);
+            try
+            {
+                var empresaId = ObterEmpresaIdDoToken();
+                var (sucesso, mensagem) = await _repository.DeletarAsync(id, empresaId);
+                if (!sucesso) return BadRequest(new { message = mensagem });
+                return Ok(new { message = mensagem });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro ao excluir lançamento: " + ex.Message });
+            }
+        }
 
-            if (!sucesso) return BadRequest(new { message = "Erro ao excluir o lançamento." });
-
-            return Ok(new { message = "Lançamento excluído com sucesso!" });
+        [HttpGet("resumo-mensal")]
+        public async Task<IActionResult> GetResumoMensal([FromQuery] int mes, [FromQuery] int ano)
+        {
+            try
+            {
+                var empresaId = ObterEmpresaIdDoToken();
+                var resumo = await _repository.ObterResumoMensalAsync(empresaId, mes, ano);
+                return Ok(resumo);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Erro ao buscar resumo: " + ex.Message });
+            }
         }
     }
 }

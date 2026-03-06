@@ -1,0 +1,22 @@
+﻿@media print {
+    .no-print {
+        display: none !important;
+    }
+
+    .row.mb-4:has(canvas) {
+        display: none !important;
+    }
+
+    #boxKpis {
+        display: none !important;
+    }
+
+    .glass-card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+
+    body {
+        background: white !important;
+    }
+}
