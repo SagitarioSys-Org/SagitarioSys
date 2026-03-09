@@ -45,6 +45,9 @@ function fazerLogin() {
             localStorage.setItem("user_nome", response.usuario);
             localStorage.setItem("user_empresa", response.empresa);
             localStorage.setItem("user_tipo", response.tipo);
+            // Após login com sucesso (onde já salva o token)
+            localStorage.setItem("empresa_logo", response.logomarca || "");
+
 
             // ✨ GUARDA A ROTA CORRETA
             localStorage.setItem("user_rota_dashboard", response.rotaDashboard);

@@ -38,8 +38,12 @@ namespace SagitarioSys.Api.Repositories.Admin
 
         public async Task<Guid> CriarAsync(Segmento segmento)
         {
+            string seg  = "/"+segmento.Nome+"/DashBoard/Index";
+
+            segmento.rotadashboard = seg;
+
             using var connection = _dbFactory.CreateConnection();
-            var sql = "INSERT INTO Segmentos (Nome, Ativo) VALUES (@Nome, @Ativo) RETURNING Id;";
+            var sql = "INSERT INTO Segmentos (nome, ativo, rotadashboard) VALUES (@nome, @ativo, @rotadashboard) RETURNING Id;";
             return await connection.QuerySingleAsync<Guid>(sql, segmento);
         }
 

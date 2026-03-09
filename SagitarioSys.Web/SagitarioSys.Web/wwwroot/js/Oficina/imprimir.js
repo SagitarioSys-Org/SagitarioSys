@@ -25,7 +25,16 @@ $(document).ready(function () {
 });
 
 function montarDocumento(os) {
-    const nomeOficina = localStorage.getItem("user_nome") || "Sagitario Sys";
+    const nomeOficina = localStorage.getItem("user_empresa") || "Sagitario Sys";
+
+    var UrlSemBarraNoFinal = _url.slice(0, -1);
+    var logo = UrlSemBarraNoFinal + localStorage.getItem("empresa_logo");
+
+    var EmpresaNomeLogo = `<img id="imgLogoRel" src="${logo}" style="max-height: 120px; object-fit: contain;">`;  
+  
+    var NomeFantasia = ` <h2 class="font-weight-bold mb-0 text-dark">${nomeOficina}</h2>`;
+  
+
     const dataAbertura = new Date(os.dataAbertura).toLocaleDateString('pt-BR');
     const numeroFormatado = String(os.numeroOS).padStart(5, '0');
     const statusOS = os.status.toUpperCase();
@@ -33,7 +42,8 @@ function montarDocumento(os) {
     let html = `
         <div class="row header-os align-items-center">
             <div class="col-8">
-                <h2 class="font-weight-bold mb-0 text-dark">${nomeOficina}</h2>
+              ${EmpresaNomeLogo}    
+              ${NomeFantasia}
                 <p class="text-muted m-0">Ordem de Serviço de Manutenção</p>
             </div>
             <div class="col-4 text-right">
