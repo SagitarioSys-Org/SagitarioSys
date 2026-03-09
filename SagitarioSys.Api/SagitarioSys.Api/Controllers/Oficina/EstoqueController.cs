@@ -13,22 +13,32 @@ namespace SagitarioSys.Api.Controllers.Oficina
         private readonly PecaRepository _repository;
         public EstoqueController(PecaRepository repository) { _repository = repository; }
 
-        private Guid EmpresaIdLogada => Guid.TryParse(User.FindFirst("EmpresaId")?.Value, out var id) ? id : Guid.Empty;
+        private bool TryObterEmpresaId(out Guid empresaId)
+            => Guid.TryParse(User.FindFirst("EmpresaId")?.Value, out empresaId);
 
         [HttpGet]
-        public async Task<IActionResult> GetAll() => Ok(await _repository.ObterTodosAsync(EmpresaIdLogada));
+        public async Task<IActionResult> GetAll()
+        {
+            if (!TryObterEmpresaId(out var empresaId)) return Unauthorized();
+            return Ok(await _repository.ObterTodosAsync(empresaId));
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(Guid id)
         {
-            var peca = await _repository.ObterPorIdAsync(id, EmpresaIdLogada);
+            if (!TryObterEmpresaId(out var empresaId)) return Unauthorized();
+
+            var peca = await _repository.ObterPorIdAsync(id, empresaId);
             return peca == null ? NotFound() : Ok(peca);
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] Peca peca)
         {
-            peca.EmpresaId = EmpresaIdLogada;
+            if (peca == null) return BadRequest(new { message = "Dados da peça são obrigatórios." });
+            if (!TryObterEmpresaId(out var empresaId)) return Unauthorized();
+
+            peca.EmpresaId = empresaId;
             peca.Id = await _repository.CriarAsync(peca);
             return Ok(peca);
         }
@@ -36,15 +46,19 @@ namespace SagitarioSys.Api.Controllers.Oficina
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] Peca peca)
         {
+            if (peca == null) return BadRequest(new { message = "Dados da peça são obrigatórios." });
             if (id != peca.Id) return BadRequest();
-            peca.EmpresaId = EmpresaIdLogada;
+            if (!TryObterEmpresaId(out var empresaId)) return Unauthorized();
+
+            peca.EmpresaId = empresaId;
             return await _repository.AtualizarAsync(peca) ? NoContent() : NotFound();
         }
 
         [HttpDelete("{id}")]
-        public IActionResult Delete(Guid id)
+        public async Task<IActionResult> Delete(Guid id)
         {
-            return BadRequest("Exclusão de produtos está desabilitada para preservar o histórico. Utilize acerto de estoque.");
+            if (!TryObterEmpresaId(out var empresaId)) return Unauthorized();
+            return await _repository.DeletarAsync(id, empresaId) ? Ok() : NotFound();
         }
     }
 }
