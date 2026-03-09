@@ -81,12 +81,10 @@ namespace SagitarioSys.Api.Repositories.Admin
         public async Task<Empresa?> ObterPorIdAsync(Guid id)
         {
             using var connection = _dbFactory.CreateConnection();
-            var sql = @"
-                SELECT 
-                    Id, NomeFantasia, RazaoSocial, CnpjCpf, InscricaoEstadual, SegmentoId, 
-                    Telefone, EmailContato, Cep, Logradouro, Numero, Complemento, Bairro, Cidade, Uf, Ativo 
-                FROM Empresas 
-                WHERE Id = @Id";
+            var sql = @"SELECT Id, NomeFantasia, RazaoSocial, CnpjCpf, InscricaoEstadual,
+                   SegmentoId, Telefone, EmailContato, Cep, Logradouro, Numero,
+                   Complemento, Bairro, Cidade, Uf, Ativo, Logomarca  
+            FROM Empresas WHERE Id = @Id";
             return await connection.QuerySingleOrDefaultAsync<Empresa>(sql, new { Id = id });
         }
 
@@ -137,5 +135,15 @@ namespace SagitarioSys.Api.Repositories.Admin
             var linhasAfetadas = await connection.ExecuteAsync(sql, new { SenhaHash = novaSenhaHash, EmpresaId = empresaId });
             return linhasAfetadas > 0;
         }
+
+        public async Task<bool> AtualizarLogomarcaAsync(Guid id, string urlLogo)
+        {
+            using var connection = _dbFactory.CreateConnection();
+            var sql = "UPDATE Empresas SET Logomarca = @Logomarca WHERE Id = @Id;";
+            var linhasAfetadas = await connection.ExecuteAsync(sql, new { Logomarca = urlLogo, Id = id });
+            return linhasAfetadas > 0;
+        }
+
+
     }
 }

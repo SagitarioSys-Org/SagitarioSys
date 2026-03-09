@@ -29,5 +29,7 @@ namespace SagitarioSys.Api.Models.Admin
         public bool Ativo { get; set; }
         public DateTime DataCadastro { get; set; }
         public string EmailAdmin { get; set; } = string.Empty;
+        public string? Logomarca { get; set; }
+
     }
 }
