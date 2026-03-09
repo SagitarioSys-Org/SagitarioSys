@@ -97,7 +97,7 @@ function removerLinha(botao) {
 // ==========================================
 function carregarClientes() {
     $.ajax({
-        url: _url + "api/Clientes",
+        url: _url + "api/Oficina/Clientes",
         type: "GET",
         success: function (dados) {
             var html = "";
@@ -182,7 +182,7 @@ function salvar() {
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Salvando...');
 
     $.ajax({
-        url: isEdicao ? `${_url}api/Clientes/${id}` : _url + "api/Clientes",
+        url: isEdicao ? `${_url}api/Oficina/Clientes/${id}` : _url + "api/Oficina/Clientes",
         type: isEdicao ? "PUT" : "POST",
         contentType: "application/json",
         data: JSON.stringify(dados),
@@ -201,7 +201,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${_url}api/Clientes/${id}`, function (c) {
+    $.get(`${_url}api/Oficina/Clientes/${id}`, function (c) {
         $("#txtId").val(c.id);
         $("#txtNome").val(c.nome);
         $("#txtCpfCnpj").val(c.cpfCnpj).trigger('input');
@@ -240,7 +240,7 @@ function deletar(id, nome) {
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: `${_url}api/Clientes/${id}`,
+                url: `${_url}api/Oficina/Clientes/${id}`,
                 type: "DELETE",
                 success: function () {
                     Swal.fire({ title: 'Excluído!', icon: 'success', timer: 1500, showConfirmButton: false });

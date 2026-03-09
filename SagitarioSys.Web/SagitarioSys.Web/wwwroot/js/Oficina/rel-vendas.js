@@ -34,7 +34,7 @@ function carregarVendas() {
     $("#btnImprimir").attr("href", `/Oficina/Relatorios/ImprimirVendas?dtInicio=${dtInicio}&dtFim=${dtFim}`);
 
     $.ajax({
-        url: `${_url}api/Relatorios/vendas?dataInicio=${dtInicio}&dataFim=${dtFim}`,
+        url: `${_url}api/Oficina/Relatorios/vendas?dataInicio=${dtInicio}&dataFim=${dtFim}`,
         type: "GET",
         success: function (dados) {
             dadosVendas = dados;

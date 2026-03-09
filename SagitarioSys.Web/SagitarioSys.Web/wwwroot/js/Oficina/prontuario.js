@@ -19,7 +19,7 @@ function buscarProntuario() {
     $("#boxResultado").html('<div class="text-center py-5"><i class="fas fa-spinner fa-spin fa-2x text-muted"></i></div>');
 
     $.ajax({
-        url: _url + "api/Prontuario/" + encodeURIComponent(placa),
+        url: _url + "api/Oficina/Prontuario/" + encodeURIComponent(placa),
         type: "GET",
         success: function (data) {
             montarResultado(data);

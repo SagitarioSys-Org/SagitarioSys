@@ -2,12 +2,10 @@
     const token = localStorage.getItem("jwt_token");
 
     $.ajax({
-        url: _url + "api/Relatorios/estoque",
+        url: _url + "api/Oficina/Relatorios/estoque",
         type: "GET",
         headers: { "Authorization": "Bearer " + token },
-        success: function (dados) {
-            montarRelatorio(dados);
-        },
+        success: function (dados) { montarRelatorio(dados); },
         error: function () {
             $("#conteudoFolha").html('<div class="alert alert-danger text-center">Erro ao carregar dados.</div>');
         }
@@ -15,7 +13,7 @@
 });
 
 function montarRelatorio(dados) {
-    const nomeOficina = localStorage.getItem("user_nome") || "SagitarioSys";
+    const nomeEmpresa = localStorage.getItem("user_nome") || "SagitarioSys";
     const dataGeracao = new Date().toLocaleString('pt-BR');
 
     var totalItens = dados.length;
@@ -37,20 +35,18 @@ function montarRelatorio(dados) {
                 <td class="text-right">${margem}%</td>
                 <td class="text-center"><strong>${p.quantidade}</strong></td>
                 <td class="text-center">${p.estoqueminimo}</td>
-                <td class="text-center"><span class="${critico ? 'badge-critico' : 'badge-normal'}">${critico ? '⚠ Crítico' : 'Normal'}</span></td>
+                <td class="text-center"><span class="${critico ? 'badge-critico' : 'badge-normal'}">${critico ? '⚠ Crítico' : '✓ Normal'}</span></td>
             </tr>
         `;
     });
 
-    var html = `
+    $("#conteudoFolha").html(`
         <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
             <div>
-                <h3 class="font-weight-bold mb-0">${nomeOficina}</h3>
+                <h3 class="font-weight-bold mb-0">${nomeEmpresa}</h3>
                 <p class="text-muted mb-0">Relatório de Estoque Atualizado</p>
             </div>
-            <div class="text-right">
-                <small class="text-muted">Gerado em: ${dataGeracao}</small>
-            </div>
+            <div class="text-right"><small class="text-muted">Gerado em: ${dataGeracao}</small></div>
         </div>
 
         <div class="row mb-4">
@@ -93,18 +89,12 @@ function montarRelatorio(dados) {
         <div class="text-center text-muted mt-4" style="font-size:0.75rem;">
             Documento gerado pelo sistema SagitarioSys em ${dataGeracao}.
         </div>
-    `;
-
-    $("#conteudoFolha").html(html);
-  
+    `);
 }
 
 function imprimir() {
     $("#divBotoes").hide();
-    setTimeout(function () {
-        window.print();
-        $("#divBotoes").show();
-    }, 300);
+    setTimeout(function () { window.print(); $("#divBotoes").show(); }, 300);
 }
 
 function formatarMoeda(valor) {

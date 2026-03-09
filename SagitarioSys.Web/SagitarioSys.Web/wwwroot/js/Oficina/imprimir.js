@@ -12,7 +12,7 @@ $(document).ready(function () {
 
     // Busca os dados completos da OS na API
     $.ajax({
-        url: _url + 'api/OrdensServico/' + osId,
+        url: _url + 'api/Oficina/OrdensServico/' + osId,
         type: 'GET',
         headers: { "Authorization": "Bearer " + token },
         success: function (os) {

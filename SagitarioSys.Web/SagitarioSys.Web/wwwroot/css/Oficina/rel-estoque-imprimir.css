@@ -24,34 +24,35 @@
 }
 
 .badge-critico {
-    background: #dc3545;
-    color: white;
-    padding: 2px 8px;
+    background: #fee;
+    color: #dc3545;
+    padding: 3px 8px;
     border-radius: 4px;
     font-size: 0.75rem;
+    font-weight: bold;
 }
 
 .badge-normal {
-    background: #28a745;
-    color: white;
-    padding: 2px 8px;
+    background: #e8f5e9;
+    color: #28a745;
+    padding: 3px 8px;
     border-radius: 4px;
     font-size: 0.75rem;
+    font-weight: bold;
 }
 
-@@media print {
+@media print {
     body {
         background: white;
-    }
-
-    .no-print {
-        display: none !important;
     }
 
     .a4-container {
         box-shadow: none;
         margin: 0;
         padding: 10mm;
-        width: 100%;
+    }
+
+    #divBotoes {
+        display: none !important;
     }
 }

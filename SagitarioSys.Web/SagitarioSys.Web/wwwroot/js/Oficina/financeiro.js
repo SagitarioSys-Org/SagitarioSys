@@ -1,5 +1,5 @@
-﻿const API_FINANCEIRO = _url + "api/Financeiro";
-const API_CATEGORIAS = _url + "api/CategoriasFinanceiras";
+﻿const API_FINANCEIRO = _url + "api/oficina/Financeiro";
+const API_CATEGORIAS = _url + "api/Oficina/CategoriasFinanceiras";
 var categoriasGlobais = [];
 var filtroPor = "vencimento";
 

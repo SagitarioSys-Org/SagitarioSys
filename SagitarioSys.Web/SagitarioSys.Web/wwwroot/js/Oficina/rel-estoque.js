@@ -7,7 +7,7 @@ $(document).ready(function () {
 
 function carregarEstoque() {
     $.ajax({
-        url: _url + "api/Relatorios/estoque",
+        url: _url + "api/Oficina/Relatorios/estoque",
         type: "GET",
         success: function (dados) {
             dadosEstoque = dados;

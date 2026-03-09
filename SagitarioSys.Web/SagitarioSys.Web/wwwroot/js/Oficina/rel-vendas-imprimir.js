@@ -10,7 +10,7 @@
     }
 
     $.ajax({
-        url: `${_url}api/Relatorios/vendas?dataInicio=${dtInicio}&dataFim=${dtFim}`,
+        url: `${_url}api/Oficina/Relatorios/vendas?dataInicio=${dtInicio}&dataFim=${dtFim}`,
         type: "GET",
         headers: { "Authorization": "Bearer " + token },
         success: function (dados) {

@@ -30,7 +30,7 @@ function carregarServicos() {
     $("#btnImprimir").attr("href", `/Oficina/Relatorios/ImprimirServicos?dtInicio=${dtInicio}&dtFim=${dtFim}`);
 
     $.ajax({
-        url: `${_url}api/Relatorios/servicos?dataInicio=${dtInicio}&dataFim=${dtFim}`,
+        url: `${_url}api/Oficina/Relatorios/servicos?dataInicio=${dtInicio}&dataFim=${dtFim}`,
         type: "GET",
         success: function (dados) {
             montarKpis(dados);
