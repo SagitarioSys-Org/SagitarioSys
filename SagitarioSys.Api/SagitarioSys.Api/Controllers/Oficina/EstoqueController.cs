@@ -42,6 +42,9 @@ namespace SagitarioSys.Api.Controllers.Oficina
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id) => await _repository.DeletarAsync(id, EmpresaIdLogada) ? Ok() : NotFound();
+        public IActionResult Delete(Guid id)
+        {
+            return BadRequest("Exclusão de produtos está desabilitada para preservar o histórico. Utilize acerto de estoque.");
+        }
     }
 }
