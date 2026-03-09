@@ -413,10 +413,11 @@ function salvar() {
 function editar(id) {
     $.get(`${_url}api/Oficina/OrdensServico/${id}`, function (os) {
         $("#txtId").val(os.id);
-        $("#ddlCliente").val(os.clienteId);
 
-        // Carrega os veículos daquele cliente e já deixa o dele selecionado
-        filtrarVeiculos(os.clienteId, os.veiculoId);
+        // Preenche os cards de Cliente/Veículo no novo fluxo de busca
+        const cpfCnpjCliente = os.clienteCpfCnpj || os.cpfCnpj || "";
+        selecionarCliente(os.clienteId, os.nomeCliente || "Cliente", cpfCnpjCliente);
+        selecionarVeiculo(os.veiculoId, os.modeloVeiculo || "Veículo", os.placaVeiculo || "", os.kmAtual || 0);
 
         $("#txtKmAtual").val(os.kmAtual);
         $("#ddlStatus").val(os.status);
@@ -909,6 +910,5 @@ $("#formCadastroRapidoVeiculo").on("submit", function (e) {
         }
     });
 });
-
 
 
