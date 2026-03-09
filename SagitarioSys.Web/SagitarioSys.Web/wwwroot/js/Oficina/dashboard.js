@@ -4,11 +4,14 @@
     carregarClimaEInfoLocal();
 
     // 2. Traz o Nome do Usuário Logado
-    var nomeUsuario = localStorage.getItem("usuario_nome");
+    var nomeUsuario = localStorage.getItem("user_empresa");
+    var nomeGestor = localStorage.getItem("user_nome");
     if (nomeUsuario) {
         $("#lblNomeUsuario").text(nomeUsuario);
     }
 
+    $("#lblNomeGestor").html(nomeGestor);
+ 
     // 3. Inicia o Cérebro de Gestão da Oficina (O Novo Motor!)
     carregarDadosDashboardGestao();
 });

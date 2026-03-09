@@ -171,7 +171,7 @@ function salvar() {
 }
 
 function editar(id) {
-    $.get(`${_url}api/Menus/${id}`, function (m) {
+    $.get(`${_url}api/Admin/Menus/${id}`, function (m) {
         $("#txtId").val(m.id);
         $("#txtTitulo").val(m.titulo);
         $("#txtIcone").val(m.icone);

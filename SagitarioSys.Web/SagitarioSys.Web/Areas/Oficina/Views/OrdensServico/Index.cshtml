@@ -1,26 +1,26 @@
 ﻿
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
-    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
-        <div>
-            <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Ordens de Serviço</h2>
-            <p class="text-muted m-0" style="font-size: 0.95rem;">Gerencie os orçamentos, manutenções e status.</p>
-        </div>
-        <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
-            <i class="fas fa-plus mr-2"></i> Nova O.S.
-        </button>
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Ordens de Serviço</h2>
+        <p class="text-muted m-0" style="font-size: 0.95rem;">Gerencie os orçamentos, manutenções e status.</p>
     </div>
+    <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
+        <i class="fas fa-plus mr-2"></i> Nova O.S.
+    </button>
+</div>
 
-    <div class="glass-card p-0 overflow-hidden mb-4">
+<div class="glass-card p-0 overflow-hidden mb-4">
 
-        <div class="p-3 border-bottom d-flex align-items-center bg-white justify-content-between">
-            <div class="d-flex align-items-center flex-grow-1 mr-3">
-                <i class="fas fa-search text-muted mr-3 pl-2"></i>
-                <input type="text" id="txtBuscaOS" class="form-control border-0 shadow-none p-0" placeholder="Buscar por cliente, CPF/CNPJ, placa ou número da OS..." style="font-size: 0.95rem; background: transparent;">
-            </div>
+    <div class="p-3 border-bottom d-flex align-items-center bg-white justify-content-between">
+        <div class="d-flex align-items-center flex-grow-1 mr-3">
+            <i class="fas fa-search text-muted mr-3 pl-2"></i>
+            <input type="text" id="txtBuscaOS" class="form-control border-0 shadow-none p-0" placeholder="Buscar por cliente, CPF/CNPJ, placa ou número da OS..." style="font-size: 0.95rem; background: transparent;">
+        </div>
 
-            <div class="d-flex align-items-center border-left pl-3" style="min-width: 200px;">
-                <i class="fas fa-filter text-muted mr-2"></i>
+        <div class="d-flex align-items-center border-left pl-3" style="min-width: 200px;">
+            <i class="fas fa-filter text-muted mr-2"></i>
             <select id="ddlFiltroStatus" class="form-control border-0 shadow-none text-muted font-weight-bold p-0" style="font-size: 0.90rem; background: transparent; cursor: pointer;">
                 <option value="">Todos os Status</option>
                 <option value="Aberta">Aberta</option>
@@ -30,8 +30,8 @@
                 <option value="Faturada">Faturada (Paga)</option>
                 <option value="Cancelada">Cancelada</option>
             </select>
-            </div>
         </div>
+    </div>
 
     <div class="table-responsive">
         <table class="table table-hover align-middle" id="tbOS">
@@ -66,46 +66,162 @@
                     <input type="hidden" id="txtId" />
 
                     <div class="glass-card p-3 mb-4 shadow-sm" style="border-radius: 8px;">
-                        <h6 class="font-weight-bold text-uppercase mb-3" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">Dados da Entrada</h6>
-                        <div class="row">
-                            <div class="col-md-4 form-group">
-                                <label class="font-weight-bold" style="color: var(--zinc-700);">Cliente <span class="text-danger">*</span></label>
-                                <select class="form-control" style="border-radius: 6px;" id="ddlCliente" required>
-                                    <option value="">Carregando...</option>
-                                </select>
+                        <h6 class="font-weight-bold text-uppercase mb-3" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">
+                            Dados da Entrada
+                        </h6>
+
+                        <!-- STEP 1 e STEP 2 lado a lado -->
+                        <div class="row mb-3">
+
+                            <!-- COLUNA ESQUERDA — CLIENTE -->
+                            <div class="col-md-6">
+                                <label class="font-weight-bold" style="color: var(--zinc-700)">
+                                    Cliente <span class="text-danger">*</span>
+                                </label>
+
+                                <!-- Busca cliente (some após selecionar) -->
+                                <div id="blocoInputCliente">
+                                    <div class="input-group">
+                                        <input type="text" id="txtBuscaCliente" class="form-control"
+                                               placeholder="Digite o CPF ou nome..."
+                                               style="border-radius: 6px 0 0 6px;">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-dark" type="button" onclick="buscarCliente()"
+                                                    style="border-radius: 0 6px 6px 0;">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- Dropdown resultado -->
+                                    <div id="resultadoBuscaCliente" style="display:none; position:relative; z-index:999;">
+                                        <div class="border rounded bg-white shadow-sm mt-1" id="listaClientes"
+                                             style="max-height:180px; overflow-y:auto; border-radius: 6px !important;"></div>
+                                        <div class="mt-2">
+                                            <button type="button" class="btn btn-sm btn-outline-success"
+                                                    onclick="abrirModalCadastroCliente()">
+                                                <i class="fas fa-user-plus mr-1"></i> Cadastrar Novo Cliente
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card cliente selecionado (some quando limpar) -->
+                                <div id="cardClienteEncontrado" class="d-none">
+                                    <input type="hidden" id="hdfClienteId">
+                                    <div class="d-flex align-items-center p-2 border rounded bg-white"
+                                         style="border-radius: 6px !important;">
+                                        <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center mr-3 flex-shrink-0"
+                                             style="width:38px; height:38px;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="font-weight-bold" id="cardClienteNome">-</div>
+                                            <small class="text-muted" id="cardClienteCpf">-</small>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ml-2"
+                                                onclick="limparCliente()" title="Trocar cliente">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-3 form-group">
-                                <label class="font-weight-bold" style="color: var(--zinc-700);">Veículo <span class="text-danger">*</span></label>
-                                <select class="form-control" style="border-radius: 6px;" id="ddlVeiculo" disabled required>
-                                    <option value="">Selecione o cliente</option>
-                                </select>
+
+                            <!-- COLUNA DIREITA — VEÍCULO -->
+                            <div class="col-md-6" id="blocoVeiculo">
+                                <label class="font-weight-bold" style="color: var(--zinc-700)">
+                                    Veículo <span class="text-danger">*</span>
+                                </label>
+
+                                <!-- Busca veículo (some após selecionar) -->
+                                <div id="blocoInputVeiculo">
+                                    <div class="input-group">
+                                        <input type="text" id="txtBuscaVeiculo" class="form-control"
+                                               placeholder="Digite a placa..."
+                                               style="border-radius: 6px 0 0 6px; text-transform:uppercase;">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-dark" type="button" onclick="buscarVeiculo()"
+                                                    style="border-radius: 0 6px 6px 0;">
+                                                <i class="fas fa-search"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <!-- Dropdown resultado -->
+                                    <div id="resultadoBuscaVeiculo" style="display:none; position:relative; z-index:999;">
+                                        <div class="border rounded bg-white shadow-sm mt-1" id="listaVeiculos"
+                                             style="max-height:180px; overflow-y:auto; border-radius: 6px !important;"></div>
+                                        <div class="mt-2">
+                                            <button type="button" class="btn btn-sm btn-outline-success"
+                                                    onclick="abrirModalCadastroVeiculo()">
+                                                <i class="fas fa-plus mr-1"></i> Cadastrar Novo Veículo
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Card veículo selecionado -->
+                                <div id="cardVeiculoEncontrado" class="d-none">
+                                    <input type="hidden" id="hdfVeiculoId">
+                                    <div class="d-flex align-items-center p-2 border rounded bg-white"
+                                         style="border-radius: 6px !important;">
+                                        <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center mr-3 flex-shrink-0"
+                                             style="width:38px; height:38px;">
+                                            <i class="fas fa-car"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="font-weight-bold" id="cardVeiculoNome">-</div>
+                                            <small class="text-muted" id="cardVeiculoPlaca">-</small>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary ml-2"
+                                                onclick="limparVeiculo()" title="Trocar veículo">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-2 form-group">
-                                <label class="font-weight-bold" style="color: var(--zinc-700);">KM Atual</label>
-                                <input type="number" class="form-control" style="border-radius: 6px;" id="txtKmAtual" placeholder="Ex: 50000">
-                            </div>
-                            <div class="col-md-3 form-group">
-                                <label class="font-weight-bold" style="color: var(--zinc-700);">Status Atual</label>
-                                <select class="form-control font-weight-bold text-primary" style="border-radius: 6px;" id="ddlStatus">
-                                    <option value="Aberta">Aberta</option>
-                                    <option value="Em Andamento">Em Andamento</option>
-                                    <option value="Aguardando Peças">Aguardando Peças</option>
-                                    <option value="Concluida">Concluída</option>
-                                    <option value="Faturada">Faturada (Paga)</option>
-                                </select>
-                            </div>
+
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 form-group mb-0">
-                                <label class="font-weight-bold" style="color: var(--zinc-700);">Relato do Cliente (O que está acontecendo?)</label>
-                                <textarea class="form-control" style="border-radius: 6px; resize: none;" id="txtRelato" rows="2" placeholder="Ex: Barulho na roda direita ao frear..."></textarea>
+
+
+                        <!-- STEP 3: KM + STATUS + TEXTOS (só aparece após veículo selecionado) -->
+                        <div id="blocoDetalhes" class="d-none">
+                            <div class="row">
+                                <div class="col-md-4 form-group">
+                                    <label class="font-weight-bold" style="color: var(--zinc-700)">KM Atual</label>
+                                    <input type="number" class="form-control" style="border-radius: 6px;"
+                                           id="txtKmAtual" placeholder="Ex: 50000">
+                                    <small class="text-muted" id="lblUltimoKm"></small>
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label class="font-weight-bold" style="color: var(--zinc-700)">Data Prev. Entrega</label>
+                                    <input type="date" class="form-control" style="border-radius: 6px;" id="txtDataPrevisao">
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label class="font-weight-bold" style="color: var(--zinc-700)">Status</label>
+                                    <select class="form-control font-weight-bold text-primary" style="border-radius: 6px;" id="ddlStatus">
+                                        <option value="Aberta">Aberta</option>
+                                        <option value="Em Andamento">Em Andamento</option>
+                                        <option value="Aguardando Peças">Aguardando Peças</option>
+                                        <option value="Concluida">Concluída</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-md-6 form-group mb-0">
-                                <label class="font-weight-bold" style="color: var(--zinc-700);">Observações Internas do Mecânico</label>
-                                <textarea class="form-control" style="border-radius: 6px; resize: none;" id="txtObs" rows="2" placeholder="Ex: Pastilhas gastas, disco necessita de passe."></textarea>
+                            <div class="row">
+                                <div class="col-md-6 form-group mb-0">
+                                    <label class="font-weight-bold" style="color: var(--zinc-700)">Relato do Cliente</label>
+                                    <textarea class="form-control" style="border-radius: 6px; resize:none;"
+                                              id="txtRelato" rows="2"
+                                              placeholder="Ex: Barulho na roda direita ao frear..."></textarea>
+                                </div>
+                                <div class="col-md-6 form-group mb-0">
+                                    <label class="font-weight-bold" style="color: var(--zinc-700)">Observações Internas do Mecânico</label>
+                                    <textarea class="form-control" style="border-radius: 6px; resize:none;"
+                                              id="txtObs" rows="2"
+                                              placeholder="Ex: Pastilhas gastas, disco necessita de passe."></textarea>
+                                </div>
                             </div>
                         </div>
                     </div>
+
 
                     <div class="glass-card p-3 shadow-sm" style="border-radius: 8px;">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -188,6 +304,212 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="modalCadastroCliente" tabindex="-1" data-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header d-flex justify-content-between align-items-center"
+                 style="background-color: var(--zinc-900); color: var(--zinc-50);">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-user-plus mr-2 text-emerald-500"></i> Cadastrar Novo Cliente
+                </h5>
+                <button type="button" class="close text-white" onclick="fecharModalCliente()" style="opacity:0.8;">&times;</button>
+            </div>
+            <form id="formCadastroRapidoCliente">
+                <div class="modal-body" style="background-color: var(--zinc-50); padding: 1.5rem;">
+
+                    <!-- Dados Principais -->
+                    <div class="glass-card p-3 mb-4 shadow-sm" style="border-radius: 8px;">
+                        <h6 class="font-weight-bold text-uppercase mb-3"
+                            style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">
+                            Dados Principais
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-8 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">
+                                    Nome Completo / Razão Social <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" class="form-control" style="border-radius: 6px;"
+                                       id="crNome" required placeholder="Ex: João da Silva">
+                            </div>
+                            <div class="col-md-4 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">CPF / CNPJ</label>
+                                <input type="text" class="form-control font-weight-bold text-primary"
+                                       style="border-radius: 6px; letter-spacing: 1px;"
+                                       id="crCpfCnpj" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Meios de Contato -->
+                    <div class="glass-card p-3 mb-4 shadow-sm" style="border-radius: 8px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                            <h6 class="font-weight-bold text-uppercase m-0"
+                                style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">
+                                Meios de Contato
+                            </h6>
+                            <button type="button" class="btn btn-sm text-white font-weight-bold shadow-sm"
+                                    style="background-color: var(--emerald-500); border-radius: 6px;"
+                                    onclick="adicionarContatoRapido()">
+                                <i class="fas fa-plus mr-1"></i> Adicionar Mais
+                            </button>
+                        </div>
+                        <div class="row font-weight-bold pb-2 mb-2 text-muted" style="font-size: 0.8rem;">
+                            <div class="col-md-3">Telefone/Celular</div>
+                            <div class="col-md-4">E-mail</div>
+                            <div class="col-md-4">Observação</div>
+                        </div>
+                        <div id="crBoxContatos"></div>
+                    </div>
+
+                    <!-- Endereço -->
+                    <div class="glass-card p-3 shadow-sm" style="border-radius: 8px;">
+                        <h6 class="font-weight-bold text-uppercase mb-3"
+                            style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">
+                            Endereço
+                        </h6>
+                        <div class="row">
+                            <div class="col-md-3 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">CEP</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" style="border-radius: 6px 0 0 6px;"
+                                           id="crCep" placeholder="00000-000">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-secondary" type="button"
+                                                style="border-radius: 0 6px 6px 0;"
+                                                onclick="buscarCepRapido()">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Logradouro</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="crLogradouro">
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Número</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="crNumero">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Bairro</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="crBairro">
+                            </div>
+                            <div class="col-md-5 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Cidade</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="crCidade">
+                            </div>
+                            <div class="col-md-2 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">UF</label>
+                                <input type="text" class="form-control" style="border-radius: 6px; text-transform:uppercase;"
+                                       id="crUf" maxlength="2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: var(--zinc-100); border-top: 1px solid var(--zinc-200);">
+                    <button type="button" class="btn btn-outline-secondary font-weight-bold"
+                            onclick="fecharModalCliente()" style="border-radius: 6px;">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn text-white font-weight-bold px-4" id="btnSalvarClienteRapido"
+                            style="background-color: var(--emerald-500); border-radius: 6px;">
+                        <i class="fas fa-check mr-2"></i> Salvar e Selecionar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCadastroVeiculo" tabindex="-1" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header d-flex justify-content-between align-items-center"
+                 style="background-color: var(--zinc-900); color: var(--zinc-50);">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-car mr-2 text-emerald-500"></i> Cadastrar Novo Veículo
+                </h5>
+                <button type="button" class="close text-white" onclick="fecharModalVeiculo()" style="opacity:0.8;">&times;</button>
+            </div>
+            <form id="formCadastroRapidoVeiculo">
+                <div class="modal-body bg-white p-4">
+
+                    <!-- Info do cliente vinculado -->
+                    <div class="alert alert-dark d-flex align-items-center mb-3 py-2" style="border-radius: 6px;">
+                        <i class="fas fa-user mr-2"></i>
+                        <span>Veículo será vinculado ao cliente: <strong id="crVeiculoClienteNome">-</strong></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">
+                                Placa <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" class="form-control plate-input" id="crPlaca"
+                                   required placeholder="ABC1C34" maxlength="8">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">
+                                Marca <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" style="border-radius: 6px;" id="crMarca" required>
+                                <option value="">Carregando marcas...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">
+                                Modelo <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" style="border-radius: 6px;" id="crModelo" required disabled>
+                                <option value="">Selecione a marca primeiro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">
+                                Ano / Modelo <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-control" style="border-radius: 6px;" id="crAno" required disabled>
+                                <option value="">Aguardando...</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Cor</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;"
+                                   id="crCor" placeholder="Ex: Prata">
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">KM Atual</label>
+                            <input type="number" class="form-control font-weight-bold text-primary"
+                                   style="border-radius: 6px;" id="crKmAtual" placeholder="0" min="0">
+                        </div>
+                        <div class="col-md-3 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Observações</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;"
+                                   id="crObsVeiculo" placeholder="Ex: Tem GNV">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: var(--zinc-50); border-top: 1px solid var(--zinc-200);">
+                    <button type="button" class="btn btn-outline-secondary font-weight-bold"
+                            onclick="fecharModalVeiculo()" style="border-radius: 6px;">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn text-white font-weight-bold px-4" id="btnSalvarVeiculoRapido"
+                            style="background-color: var(--emerald-500); border-radius: 6px;">
+                        <i class="fas fa-check mr-2"></i> Salvar e Selecionar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
