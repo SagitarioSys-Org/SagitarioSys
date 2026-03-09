@@ -2,6 +2,11 @@
 let listaTodosVeiculos = []; // Guardamos na memória para filtrar rápido
 let listaTodosClientes = [];
 const FIPE_BASE = "https://parallelum.com.br/fipe/api/v1/carros/marcas";
+let osEmModoSomenteLeitura = false;
+
+function isOsFechada(status) {
+    return ["Concluida", "Faturada", "Cancelada"].includes(status);
+}
 
 $(document).ready(function () {
     carregarListasAuxiliares();
@@ -303,6 +308,7 @@ function carregarOrdens() {
 }
 
 function abrirModal() {
+    osEmModoSomenteLeitura = false;
     $("#formOS")[0].reset();
     $("#txtId").val("");
     $("#hdfClienteId").val("");
@@ -413,6 +419,7 @@ function salvar() {
 function editar(id) {
     $.get(`${_url}api/Oficina/OrdensServico/${id}`, function (os) {
         $("#txtId").val(os.id);
+        osEmModoSomenteLeitura = isOsFechada(os.status);
 
         // Preenche os cards de Cliente/Veículo no novo fluxo de busca
         const cpfCnpjCliente = os.clienteCpfCnpj || os.cpfCnpj || "";
@@ -432,7 +439,7 @@ function editar(id) {
                 adicionarItemOS(i.tipo, i.descricao, i.quantidade, i.valorUnitario, i.pecaId);
             });
         }
-        if (os.status === "Faturada") {
+        if (osEmModoSomenteLeitura) {
             // 1. Desativa todos os campos de texto e selects
             $("#formOS input, #formOS select, #formOS textarea").prop("disabled", true);
 
@@ -443,6 +450,9 @@ function editar(id) {
             // Um pequeno delay para dar tempo do HTML dos itens ser desenhado antes de esconder os botões de apagar
             setTimeout(() => { $(".btn-outline-danger").hide(); }, 100);
 
+            // Bloqueia também os botões de troca de cliente/veículo
+            $("#cardClienteEncontrado button, #cardVeiculoEncontrado button").hide();
+
             // 3. Muda o título para deixar claro que é apenas visualização
             $("#modalTitle").html(`<i class="fas fa-lock text-warning mr-2"></i> Visualizar O.S #${os.numeroOS.toString().padStart(4, '0')} (Fechada)`);
         } else {
@@ -451,6 +461,7 @@ function editar(id) {
             $("#btnSalvar").show();
             $("#btnAdicionarItemOS").show();
             setTimeout(() => { $(".btn-outline-danger").show(); }, 100);
+            $("#cardClienteEncontrado button, #cardVeiculoEncontrado button").show();
 
             $("#modalTitle").html(`<i class="fas fa-edit mr-2"></i> Editar O.S #${os.numeroOS.toString().padStart(4, '0')}`);
         }
@@ -607,6 +618,8 @@ function selecionarCliente(id, nome, cpf) {
 
 
 function limparCliente() {
+    if (osEmModoSomenteLeitura) return;
+
     $("#hdfClienteId").val("");
     $("#cardClienteEncontrado").addClass("d-none");
     $("#blocoInputCliente").show();
@@ -675,6 +688,8 @@ function selecionarVeiculo(id, nome, placa, ultimoKm) {
 }
 
 function limparVeiculo() {
+    if (osEmModoSomenteLeitura) return;
+
     $("#hdfVeiculoId").val("");
     $("#cardVeiculoEncontrado").addClass("d-none");
     $("#blocoInputVeiculo").show();
@@ -910,5 +925,4 @@ $("#formCadastroRapidoVeiculo").on("submit", function (e) {
         }
     });
 });
-
 
