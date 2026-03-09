@@ -20,11 +20,10 @@ namespace SagitarioSys.Api.Controllers.Oficina
             _repository = repository;
         }
 
-        private Guid ObterEmpresaIdDoToken()
+        private bool TryObterEmpresaIdDoToken(out Guid empresaId)
         {
             var claimEmpresa = User.Claims.FirstOrDefault(c => c.Type == "EmpresaId");
-            if (claimEmpresa == null) throw new UnauthorizedAccessException("Empresa não identificada.");
-            return Guid.Parse(claimEmpresa.Value);
+            return Guid.TryParse(claimEmpresa?.Value, out empresaId);
         }
 
         [HttpGet]
@@ -32,7 +31,8 @@ namespace SagitarioSys.Api.Controllers.Oficina
         {
             try
             {
-                var categorias = await _repository.ObterTodosAsync(ObterEmpresaIdDoToken());
+                if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
+                var categorias = await _repository.ObterTodosAsync(empresaId);
                 return Ok(categorias);
             }
             catch (Exception ex) { return StatusCode(500, new { message = ex.Message }); }
@@ -41,7 +41,9 @@ namespace SagitarioSys.Api.Controllers.Oficina
         [HttpGet("{id}")]
         public async Task<IActionResult> ObterPorId(Guid id)
         {
-            var categoria = await _repository.ObterPorIdAsync(id, ObterEmpresaIdDoToken());
+            if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
+
+            var categoria = await _repository.ObterPorIdAsync(id, empresaId);
             if (categoria == null) return NotFound();
             return Ok(categoria);
         }
@@ -49,7 +51,9 @@ namespace SagitarioSys.Api.Controllers.Oficina
         [HttpPost]
         public async Task<IActionResult> Criar([FromBody] CategoriaFinanceira categoria)
         {
-            categoria.EmpresaId = ObterEmpresaIdDoToken();
+            if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
+
+            categoria.EmpresaId = empresaId;
             var novoId = await _repository.CriarAsync(categoria);
             return Ok(new { id = novoId });
         }
@@ -58,7 +62,9 @@ namespace SagitarioSys.Api.Controllers.Oficina
         public async Task<IActionResult> Atualizar(Guid id, [FromBody] CategoriaFinanceira categoria)
         {
             categoria.Id = id;
-            categoria.EmpresaId = ObterEmpresaIdDoToken();
+            if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
+
+            categoria.EmpresaId = empresaId;
             await _repository.AtualizarAsync(categoria);
             return Ok();
         }
@@ -66,7 +72,9 @@ namespace SagitarioSys.Api.Controllers.Oficina
         [HttpDelete("{id}")]
         public async Task<IActionResult> Deletar(Guid id)
         {
-            await _repository.DeletarAsync(id, ObterEmpresaIdDoToken());
+            if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
+
+            await _repository.DeletarAsync(id, empresaId);
             return Ok();
         }
     }

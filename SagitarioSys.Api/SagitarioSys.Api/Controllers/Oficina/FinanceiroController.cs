@@ -17,12 +17,10 @@ namespace SagitarioSys.Api.Controllers.Oficina
             _repository = repository;
         }
 
-        private Guid ObterEmpresaIdDoToken()
+        private bool TryObterEmpresaIdDoToken(out Guid empresaId)
         {
             var claim = User.Claims.FirstOrDefault(c => c.Type == "EmpresaId");
-            if (claim == null || string.IsNullOrEmpty(claim.Value))
-                throw new UnauthorizedAccessException("Empresa não identificada no token.");
-            return Guid.Parse(claim.Value);
+            return Guid.TryParse(claim?.Value, out empresaId);
         }
 
         [HttpGet]
@@ -33,10 +31,11 @@ namespace SagitarioSys.Api.Controllers.Oficina
         {
             try
             {
-                var empresaId = ObterEmpresaIdDoToken();
+                if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
 
-                var dtInicio = DateTime.TryParse(dataInicio, out var di) ? di : new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
-                var dtFim = DateTime.TryParse(dataFim, out var df) ? df : new DateTime(DateTime.Now.Year, DateTime.Now.Month + 1, 1).AddDays(-1);
+                var hoje = DateTime.Today;
+                var dtInicio = DateTime.TryParse(dataInicio, out var di) ? di : new DateTime(hoje.Year, hoje.Month, 1);
+                var dtFim = DateTime.TryParse(dataFim, out var df) ? df : new DateTime(hoje.Year, hoje.Month, 1).AddMonths(1).AddDays(-1);
 
                 var lancamentos = await _repository.ObterTodosAsync(empresaId, dtInicio, dtFim, filtroPor);
                 return Ok(lancamentos);
@@ -53,7 +52,7 @@ namespace SagitarioSys.Api.Controllers.Oficina
         {
             try
             {
-                var empresaId = ObterEmpresaIdDoToken();
+                if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
                 var lancamento = await _repository.ObterPorIdAsync(id, empresaId);
                 if (lancamento == null) return NotFound(new { message = "Lançamento não encontrado." });
                 return Ok(lancamento);
@@ -69,7 +68,8 @@ namespace SagitarioSys.Api.Controllers.Oficina
         {
             try
             {
-                lancamento.EmpresaId = ObterEmpresaIdDoToken();
+                if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
+                lancamento.EmpresaId = empresaId;
                 var novoId = await _repository.CriarAsync(lancamento);
                 if (novoId == Guid.Empty) return BadRequest(new { message = "Erro ao registrar o lançamento." });
                 return Ok(new { message = "Lançamento registrado com sucesso!", id = novoId });
@@ -86,7 +86,8 @@ namespace SagitarioSys.Api.Controllers.Oficina
             try
             {
                 lancamento.Id = id;
-                lancamento.EmpresaId = ObterEmpresaIdDoToken();
+                if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
+                lancamento.EmpresaId = empresaId;
                 var (sucesso, mensagem) = await _repository.AtualizarAsync(lancamento);
                 if (!sucesso) return BadRequest(new { message = mensagem });
                 return Ok(new { message = mensagem });
@@ -103,7 +104,7 @@ namespace SagitarioSys.Api.Controllers.Oficina
         {
             try
             {
-                var empresaId = ObterEmpresaIdDoToken();
+                if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
                 var (sucesso, mensagem) = await _repository.DeletarAsync(id, empresaId);
                 if (!sucesso) return BadRequest(new { message = mensagem });
                 return Ok(new { message = mensagem });
@@ -119,7 +120,7 @@ namespace SagitarioSys.Api.Controllers.Oficina
         {
             try
             {
-                var empresaId = ObterEmpresaIdDoToken();
+                if (!TryObterEmpresaIdDoToken(out var empresaId)) return Unauthorized();
                 var resumo = await _repository.ObterResumoMensalAsync(empresaId, mes, ano);
                 return Ok(resumo);
             }
