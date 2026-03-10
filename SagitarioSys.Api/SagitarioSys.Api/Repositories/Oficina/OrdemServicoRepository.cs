@@ -134,7 +134,7 @@ namespace SagitarioSys.Api.Repositories.Oficina
 
                         if (item.Tipo == "Peca" && item.PecaId != null)
                         {
-                            await connection.ExecuteAsync("UPDATE EstoquePecas SET Quantidade = Quantidade - @Quantidade WHERE Id = @PecaId", new { item.Quantidade, item.PecaId }, transaction);
+                            await DeduzirEstoqueAgrupadoAsync(connection, transaction, os.EmpresaId, item.PecaId.Value, item.Quantidade);
                         }
                     }
                 }
@@ -206,7 +206,7 @@ namespace SagitarioSys.Api.Repositories.Oficina
 
                             if (item.Tipo == "Peca" && item.PecaId != null)
                             {
-                                await connection.ExecuteAsync("UPDATE EstoquePecas SET Quantidade = Quantidade - @Quantidade WHERE Id = @PecaId", new { item.Quantidade, item.PecaId }, transaction);
+                                await DeduzirEstoqueAgrupadoAsync(connection, transaction, os.EmpresaId, item.PecaId.Value, item.Quantidade);
                             }
                         }
                     }
@@ -236,6 +236,46 @@ namespace SagitarioSys.Api.Repositories.Oficina
             using var connection = _dbFactory.CreateConnection();
             var sql = "UPDATE OrdensServico SET Status = @Status WHERE Id = @Id AND EmpresaId = @EmpresaId;";
             return await connection.ExecuteAsync(sql, new { Status = status, Id = id, EmpresaId = empresaId }) > 0;
+        }
+
+        private static async Task DeduzirEstoqueAgrupadoAsync(System.Data.IDbConnection connection, System.Data.IDbTransaction transaction, Guid empresaId, Guid pecaId, decimal quantidadeNecessaria)
+        {
+            var referencia = await connection.QuerySingleOrDefaultAsync<(string Nome, string? Sku)>(
+                "SELECT Nome, Sku FROM EstoquePecas WHERE Id = @PecaId AND EmpresaId = @EmpresaId",
+                new { PecaId = pecaId, EmpresaId = empresaId },
+                transaction);
+
+            if (string.IsNullOrWhiteSpace(referencia.Nome))
+                throw new InvalidOperationException("Peça de referência não encontrada para deduzir estoque.");
+
+            var estoqueAgrupado = (await connection.QueryAsync<(Guid Id, decimal Quantidade)>(@"
+                SELECT Id, Quantidade
+                FROM EstoquePecas
+                WHERE EmpresaId = @EmpresaId
+                  AND LOWER(TRIM(Nome)) = LOWER(TRIM(@Nome))
+                  AND COALESCE(LOWER(TRIM(Sku)), '') = COALESCE(LOWER(TRIM(@Sku)), '')
+                  AND Quantidade > 0
+                ORDER BY DataCadastro, Id;",
+                new { EmpresaId = empresaId, referencia.Nome, referencia.Sku },
+                transaction)).ToList();
+
+            var saldoDisponivel = estoqueAgrupado.Sum(x => x.Quantidade);
+            if (saldoDisponivel < quantidadeNecessaria)
+                throw new InvalidOperationException("Saldo insuficiente no estoque agrupado para a peça selecionada.");
+
+            var restante = quantidadeNecessaria;
+            foreach (var itemEstoque in estoqueAgrupado)
+            {
+                if (restante <= 0) break;
+
+                var deducao = Math.Min(itemEstoque.Quantidade, restante);
+                await connection.ExecuteAsync(
+                    "UPDATE EstoquePecas SET Quantidade = Quantidade - @Deducao WHERE Id = @Id;",
+                    new { Deducao = deducao, itemEstoque.Id },
+                    transaction);
+
+                restante -= deducao;
+            }
         }
     }
 }

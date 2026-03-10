@@ -13,7 +13,14 @@ namespace SagitarioSys.Api.Repositories.Oficina
         public async Task<IEnumerable<Peca>> ObterTodosAsync(Guid empresaId)
         {
             using var connection = _dbFactory.CreateConnection();
-            var sql = "SELECT * FROM EstoquePecas WHERE EmpresaId = @EmpresaId ORDER BY Nome;";
+            var sql = @"
+                SELECT *,
+                       SUM(Quantidade) OVER (
+                           PARTITION BY LOWER(TRIM(Nome)), COALESCE(LOWER(TRIM(Sku)), '')
+                       ) AS QuantidadeAgrupada
+                FROM EstoquePecas
+                WHERE EmpresaId = @EmpresaId
+                ORDER BY Nome, DataCadastro;";
             return await connection.QueryAsync<Peca>(sql, new { EmpresaId = empresaId });
         }
 
