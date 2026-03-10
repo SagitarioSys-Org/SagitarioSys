@@ -310,17 +310,28 @@ function carregarOrdens() {
 function abrirModal() {
     osEmModoSomenteLeitura = false;
     $("#formOS")[0].reset();
+    $("#formOS input, #formOS select, #formOS textarea").prop("disabled", false);
     $("#txtId").val("");
     $("#hdfClienteId").val("");
     $("#hdfVeiculoId").val("");
 
     // Reseta o fluxo de busca
     $("#cardClienteEncontrado").addClass("d-none");
-    $("#txtBuscaCliente").closest(".col-md-6").removeClass("d-none").find("input").val("");
+    $("#blocoInputCliente").show();
+    $("#txtBuscaCliente").val("");
     $("#blocoVeiculo").addClass("d-none");
+    $("#blocoInputVeiculo").show();
+    $("#cardVeiculoEncontrado").addClass("d-none");
     $("#blocoDetalhes").addClass("d-none");
     limparVeiculo();
     $("#resultadoBuscaCliente").hide();
+    $("#resultadoBuscaVeiculo").hide();
+
+    // Garante que o estado de edição/visualização da OS anterior não vaze para a nova.
+    $("#btnSalvar").show();
+    $("#btnAdicionarItemOS").show();
+    $("#cardClienteEncontrado button, #cardVeiculoEncontrado button").show();
+    $(".btn-outline-danger").show();
 
     $("#boxItensOS").empty();
     adicionarItemOS();
@@ -925,4 +936,3 @@ $("#formCadastroRapidoVeiculo").on("submit", function (e) {
         }
     });
 });
-
