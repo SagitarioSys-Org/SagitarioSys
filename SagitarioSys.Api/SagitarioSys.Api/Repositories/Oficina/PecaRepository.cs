@@ -15,15 +15,15 @@ namespace SagitarioSys.Api.Repositories.Oficina
             using var connection = _dbFactory.CreateConnection();
             var sql = @"
                 SELECT
-                    id AS \"Id\",
-                    empresaid AS \"EmpresaId\",
-                    nome AS \"Nome\",
-                    sku AS \"Sku\",
-                    fornecedor AS \"Fornecedor\",
-                    custo AS \"Custo\",
-                    precovenda AS \"PrecoVenda\",
-                    quantidade AS \"Quantidade\",
-                    estoqueminimo AS \"EstoqueMinimo\"
+                    id AS Id,
+                    empresaid AS EmpresaId,
+                    nome AS Nome,
+                    sku AS Sku,
+                    fornecedor AS  Fornecedor,
+                    custo AS Custo ,
+                    precovenda AS PrecoVenda,
+                    quantidade AS Quantidade,
+                    estoqueminimo AS EstoqueMinimo
                 FROM estoquepecas
                 WHERE empresaid = @EmpresaId
                 ORDER BY nome;";
@@ -35,15 +35,15 @@ namespace SagitarioSys.Api.Repositories.Oficina
             using var connection = _dbFactory.CreateConnection();
             var sql = @"
                 SELECT
-                    id AS \"Id\",
-                    empresaid AS \"EmpresaId\",
-                    nome AS \"Nome\",
-                    sku AS \"Sku\",
-                    fornecedor AS \"Fornecedor\",
-                    custo AS \"Custo\",
-                    precovenda AS \"PrecoVenda\",
-                    quantidade AS \"Quantidade\",
-                    estoqueminimo AS \"EstoqueMinimo\"
+                    id AS Id,
+                    empresaid AS EmpresaId,
+                    nome AS Nome,
+                    sku AS Sku,
+                    fornecedor AS Fornecedor,
+                    custo AS Custo,
+                    precovenda AS PrecoVenda,
+                    quantidade AS Quantidade,
+                    estoqueminimo AS EstoqueMinimo
                 FROM estoquepecas
                 WHERE id = @Id AND empresaid = @EmpresaId;";
             return await connection.QuerySingleOrDefaultAsync<Peca>(sql, new { Id = id, EmpresaId = empresaId });
