@@ -13,14 +13,39 @@ namespace SagitarioSys.Api.Repositories.Oficina
         public async Task<IEnumerable<Peca>> ObterTodosAsync(Guid empresaId)
         {
             using var connection = _dbFactory.CreateConnection();
-            var sql = "SELECT * FROM EstoquePecas WHERE EmpresaId = @EmpresaId ORDER BY Nome;";
+            var sql = @"
+                SELECT
+                    id AS \"Id\",
+                    empresaid AS \"EmpresaId\",
+                    nome AS \"Nome\",
+                    sku AS \"Sku\",
+                    fornecedor AS \"Fornecedor\",
+                    custo AS \"Custo\",
+                    precovenda AS \"PrecoVenda\",
+                    quantidade AS \"Quantidade\",
+                    estoqueminimo AS \"EstoqueMinimo\"
+                FROM estoquepecas
+                WHERE empresaid = @EmpresaId
+                ORDER BY nome;";
             return await connection.QueryAsync<Peca>(sql, new { EmpresaId = empresaId });
         }
 
         public async Task<Peca?> ObterPorIdAsync(Guid id, Guid empresaId)
         {
             using var connection = _dbFactory.CreateConnection();
-            var sql = "SELECT * FROM EstoquePecas WHERE Id = @Id AND EmpresaId = @EmpresaId;";
+            var sql = @"
+                SELECT
+                    id AS \"Id\",
+                    empresaid AS \"EmpresaId\",
+                    nome AS \"Nome\",
+                    sku AS \"Sku\",
+                    fornecedor AS \"Fornecedor\",
+                    custo AS \"Custo\",
+                    precovenda AS \"PrecoVenda\",
+                    quantidade AS \"Quantidade\",
+                    estoqueminimo AS \"EstoqueMinimo\"
+                FROM estoquepecas
+                WHERE id = @Id AND empresaid = @EmpresaId;";
             return await connection.QuerySingleOrDefaultAsync<Peca>(sql, new { Id = id, EmpresaId = empresaId });
         }
 
