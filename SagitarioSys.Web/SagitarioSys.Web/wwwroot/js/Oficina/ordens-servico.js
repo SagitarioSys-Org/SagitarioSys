@@ -38,22 +38,6 @@ $(document).ready(function () {
         if (e.which === 13) { e.preventDefault(); buscarVeiculo(); }
     });
 
-    // Máscara CPF/CNPJ no campo de busca de cliente
-    $('#txtBuscaCliente').on('input', function () {
-        let v = $(this).val().replace(/\D/g, '');
-        if (v.length <= 11) {
-            v = v.replace(/(\d{3})(\d)/, '$1.$2');
-            v = v.replace(/(\d{3})(\d)/, '$1.$2');
-            v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-        } else {
-            v = v.replace(/^(\d{2})(\d)/, '$1.$2');
-            v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
-            v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
-            v = v.replace(/(\d{4})(\d)/, '$1-$2');
-        }
-        $(this).val(v);
-    });
-
 });
 
 
@@ -573,12 +557,18 @@ function buscarCliente() {
     const termo = $("#txtBuscaCliente").val().trim();
     if (!termo) return;
 
+    const termoNome = termo.toLowerCase();
     const termoLimpo = termo.replace(/\D/g, '');
 
-    const resultados = listaTodosClientes.filter(c =>
-        c.nome.toLowerCase().includes(termo.toLowerCase()) ||
-        (c.cpfCnpj && c.cpfCnpj.replace(/\D/g, '').includes(termoLimpo))
-    );
+    const resultados = listaTodosClientes.filter(c => {
+        const nomeCliente = (c.nome || '').toLowerCase();
+        const cpfCnpjCliente = (c.cpfCnpj || '').replace(/\D/g, '');
+
+        const encontrouPorNome = nomeCliente.includes(termoNome);
+        const encontrouPorCpfCnpj = termoLimpo.length > 0 && cpfCnpjCliente.includes(termoLimpo);
+
+        return encontrouPorNome || encontrouPorCpfCnpj;
+    });
 
     if (resultados.length === 0) {
         $("#listaClientes").html(`
