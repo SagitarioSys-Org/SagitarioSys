@@ -45,10 +45,12 @@ function renderizarTabela(dados) {
         let statusBadge = "";
         let corQtd = "color: var(--zinc-800);";
 
-        if (p.quantidade <= 0) {
+        const saldoConsolidado = obterSaldoConsolidado(p);
+
+        if (saldoConsolidado <= 0) {
             statusBadge = `<span class="badge" style="background-color: #fef2f2; color: #ef4444; border: 1px solid #fecaca; font-weight: 600;">SEM ESTOQUE</span>`;
             corQtd = "color: #ef4444; font-weight: bold;";
-        } else if (p.quantidade <= p.estoqueMinimo) {
+        } else if (saldoConsolidado <= p.estoqueMinimo) {
             statusBadge = `<span class="badge" style="background-color: #fffbeb; color: #f59e0b; border: 1px solid #fde68a; font-weight: 600;"><i class="fas fa-exclamation-circle mr-1"></i> ESTOQUE BAIXO</span>`;
             corQtd = "color: #f59e0b; font-weight: bold;";
         } else {
@@ -62,7 +64,7 @@ function renderizarTabela(dados) {
                     <div style="font-size: 0.75rem; color: var(--zinc-400);">${p.fornecedor || 'Sem fornecedor informado'}</div>
                 </td>
                 <td class="py-3"><code>${p.sku || '-'}</code></td>
-                <td class="py-3" style="${corQtd}">${p.quantidade} unidades</td>
+                <td class="py-3" style="${corQtd}">${saldoConsolidado} unidades</td>
                 <td class="py-3 text-muted">${formatarMoeda(p.custo)}</td>
                 <td class="py-3 font-weight-bold" style="color: var(--zinc-900);">${formatarMoeda(p.precoVenda)}</td>
                 <td class="py-3 font-weight-bold" style="color: #10b981;">${margem.toFixed(0)}%</td>
@@ -82,8 +84,9 @@ function atualizarCardsResumo(dados) {
     let itensBaixos = 0;
 
     dados.forEach(p => {
-        valorTotal += (p.quantidade * p.custo);
-        if (p.quantidade <= p.estoqueMinimo) itensBaixos++;
+        const saldoConsolidado = obterSaldoConsolidado(p);
+        valorTotal += (saldoConsolidado * p.custo);
+        if (saldoConsolidado <= p.estoqueMinimo) itensBaixos++;
     });
 
     $("#cardValorTotal").text(formatarMoeda(valorTotal));
@@ -96,8 +99,22 @@ function preencherComboAjuste(dados) {
     $combo.empty();
     $combo.append('<option value="">Selecione um produto...</option>');
     dados.forEach(p => {
-        $combo.append(`<option value="${p.id}">${p.nome} (${p.sku || 'sem código'}) - Saldo: ${p.quantidade}</option>`);
+        $combo.append(`<option value="${p.id}">${p.nome} (${p.sku || 'sem código'}) - Saldo consolidado: ${obterSaldoConsolidado(p)}</option>`);
     });
+}
+
+
+function obterSaldoConsolidado(peca) {
+    if (peca.quantidadeAgrupada !== undefined && peca.quantidadeAgrupada !== null) {
+        return peca.quantidadeAgrupada;
+    }
+
+    const nome = (peca.nome || '').trim().toLowerCase();
+    const sku = (peca.sku || '').trim().toLowerCase();
+
+    return listaPecas
+        .filter(x => ((x.nome || '').trim().toLowerCase() === nome) && (((x.sku || '').trim().toLowerCase()) === sku))
+        .reduce((total, atual) => total + (parseFloat(atual.quantidade) || 0), 0);
 }
 
 function formatarMoeda(valor) {
