@@ -316,7 +316,8 @@ function abrirModal() {
 
     // Reseta o fluxo de busca
     $("#cardClienteEncontrado").addClass("d-none");
-    $("#txtBuscaCliente").closest(".col-md-6").removeClass("d-none").find("input").val("");
+    $("#blocoInputCliente").show();
+    $("#txtBuscaCliente").val("");
     $("#blocoVeiculo").addClass("d-none");
     $("#blocoDetalhes").addClass("d-none");
     limparVeiculo();
@@ -925,4 +926,3 @@ $("#formCadastroRapidoVeiculo").on("submit", function (e) {
         }
     });
 });
-
