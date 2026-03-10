@@ -10,6 +10,7 @@
         public decimal Custo { get; set; }
         public decimal PrecoVenda { get; set; }
         public decimal Quantidade { get; set; }
+        public decimal QuantidadeAgrupada { get; set; }
         public decimal EstoqueMinimo { get; set; }
     }
 }
