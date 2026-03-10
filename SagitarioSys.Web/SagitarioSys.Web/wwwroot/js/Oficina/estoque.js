@@ -1,4 +1,5 @@
 ﻿let listaPecas = [];
+let listaFornecedores = [];
 
 $(document).ready(function () {
     carregarPecas();
@@ -19,6 +20,21 @@ $(document).ready(function () {
         e.preventDefault();
         aplicarAjuste();
     });
+
+    function carregarFornecedores() {
+        $.get(`${_url}api/Oficina/Fornecedores`, function (dados) {
+            listaFornecedores = dados || [];
+            preencherBuscaFornecedores();
+        });
+    }
+
+    function preencherBuscaFornecedores() {
+        const $lista = $('#listaFornecedores');
+        $lista.empty();
+        listaFornecedores.forEach(f => {
+            $lista.append(`<option value="${f.nomeFantasia}">${f.documento || ''}</option>`);
+        });
+    }
 });
 
 function carregarPecas() {
@@ -32,6 +48,36 @@ function carregarPecas() {
             preencherComboAjuste(dados);
         }
     });
+}
+
+function preencherBuscaProdutos() {
+    const $lista = $('#listaProdutosExistentes');
+    $lista.empty();
+    listaPecas.forEach(p => {
+        $lista.append(`<option value="${p.sku || ''}">${p.nome}</option>`);
+    });
+}
+
+function aplicarProdutoExistente() {
+    const termo = ($('#txtBuscaProdutoCadastro').val() || '').trim().toLowerCase();
+    if (!termo) return;
+
+    const existente = listaPecas.find(p => (p.sku || '').toLowerCase() === termo || (p.nome || '').toLowerCase().includes(termo));
+    if (!existente) {
+        Swal.fire('Atenção', 'Nenhum produto encontrado para o termo informado.', 'warning');
+        return;
+    }
+
+    $('#txtId').val(existente.id);
+    $('#txtNome').val(existente.nome);
+    $('#txtSku').val(existente.sku);
+    $('#txtFornecedor').val(existente.fornecedor || '');
+    $('#txtQtd').val('0');
+    $('#txtQtdMinima').val(existente.estoqueMinimo);
+    $('#txtCusto').val(existente.custo);
+    $('#txtVenda').val(existente.precoVenda);
+
+    Swal.fire('Produto localizado', 'Informe a quantidade de entrada para somar ao saldo existente.', 'info');
 }
 
 function renderizarTabela(dados) {
@@ -105,16 +151,23 @@ function preencherComboAjuste(dados) {
 
 
 function obterSaldoConsolidado(peca) {
-    if (peca.quantidadeAgrupada !== undefined && peca.quantidadeAgrupada !== null) {
-        return peca.quantidadeAgrupada;
+    const quantidadeAgrupada = parseFloat(peca.quantidadeAgrupada);
+    if (!isNaN(quantidadeAgrupada) && quantidadeAgrupada > 0) {
+        return quantidadeAgrupada;
     }
 
     const nome = (peca.nome || '').trim().toLowerCase();
     const sku = (peca.sku || '').trim().toLowerCase();
 
-    return listaPecas
+    const saldoPorNomeSku = listaPecas
         .filter(x => ((x.nome || '').trim().toLowerCase() === nome) && (((x.sku || '').trim().toLowerCase()) === sku))
         .reduce((total, atual) => total + (parseFloat(atual.quantidade) || 0), 0);
+
+    if (saldoPorNomeSku > 0) {
+        return saldoPorNomeSku;
+    }
+
+    return parseFloat(peca.quantidade) || 0;
 }
 
 function formatarMoeda(valor) {
@@ -150,9 +203,25 @@ function salvar() {
         Swal.fire('Validação', 'Informe um código de produto (SKU) válido.', 'warning');
         return;
     }
-
-    if (isEdicao)
+    if (!isEdicao) {
+        const skuBusca = dados.sku.trim().toLowerCase();
+        const existente = listaPecas.find(x => (x.sku || '').trim().toLowerCase() === skuBusca);
+        if (existente) {
+            isEdicao = true;
+            id = existente.id;
+            dados.id = existente.id;
+            const qtdAtual = parseFloat(existente.quantidade) || 0;
+            const novaQuantidade = qtdAtual + dados.quantidade;
+            dados.quantidade = novaQuantidade;
+            dados.custo = novaQuantidade > 0 ? (((existente.custo * qtdAtual) + (dados.custo * (parseFloat($('#txtQtd').val()) || 0))) / novaQuantidade) : dados.custo;
+            dados.precoVenda = novaQuantidade > 0 ? (((existente.precoVenda * qtdAtual) + (dados.precoVenda * (parseFloat($('#txtQtd').val()) || 0))) / novaQuantidade) : dados.precoVenda;
+            dados.estoqueMinimo = Math.max(existente.estoqueMinimo, dados.estoqueMinimo);
+            dados.nome = dados.nome || existente.nome;
+            dados.fornecedor = dados.fornecedor || existente.fornecedor;
+        }
+    } else {
         dados.id = id;
+    }
 
     var $btn = $("#btnSalvar");
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...');

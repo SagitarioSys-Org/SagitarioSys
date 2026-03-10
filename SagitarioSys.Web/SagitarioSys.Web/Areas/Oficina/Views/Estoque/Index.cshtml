@@ -10,6 +10,9 @@
         <button class="btn btn-outline-secondary font-weight-bold px-3 py-2 mr-2 d-flex align-items-center" style="border-radius: 8px;" onclick="abrirModalAjuste()">
             <i class="fas fa-clipboard-check mr-2"></i> Acerto de Estoque
         </button>
+        <a class="btn btn-outline-secondary font-weight-bold px-3 py-2 mr-2 d-flex align-items-center" style="border-radius: 8px;" href="/Oficina/Fornecedores">
+            <i class="fas fa-truck mr-2"></i> Fornecedores
+        </a>
         <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
             <i class="fas fa-plus mr-2"></i> Cadastrar Produto
         </button>
@@ -93,9 +96,24 @@
                     </div>
 
                     <div class="row">
-                        <div class="col-md-12 form-group">
+                        <div class="col-md-8 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Buscar produto já cadastrado</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtBuscaProdutoCadastro" placeholder="Digite nome ou SKU para localizar" list="listaProdutosExistentes">
+                            <datalist id="listaProdutosExistentes"></datalist>
+                        </div>
+                        <div class="col-md-4 form-group d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-info w-100" onclick="aplicarProdutoExistente()"><i class="fas fa-search mr-2"></i>Usar produto existente</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-9 form-group">
                             <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Fornecedor / Local de Compra</label>
-                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtFornecedor" placeholder="Ex: Mercado Livre, Distribuidora XYZ...">
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtFornecedor" list="listaFornecedores" placeholder="Busque por um fornecedor cadastrado">
+                            <datalist id="listaFornecedores"></datalist>
+                        </div>
+                        <div class="col-md-3 form-group d-flex align-items-end">
+                            <a href="/Oficina/Fornecedores" class="btn btn-outline-secondary w-100"><i class="fas fa-plus mr-2"></i>Novo fornecedor</a>
                         </div>
                     </div>
 
