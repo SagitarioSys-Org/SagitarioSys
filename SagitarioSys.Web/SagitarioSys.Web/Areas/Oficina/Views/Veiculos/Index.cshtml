@@ -54,12 +54,48 @@
 
                     <div class="row">
                         <div class="col-md-12 form-group">
-                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Proprietário (Cliente) <span class="text-danger">*</span></label>
-                            <select class="form-control" style="border-radius: 6px; border-color: var(--zinc-300);" id="ddlCliente" required>
-                                <option value="">Carregando clientes...</option>
-                            </select>
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">
+                                Proprietário (Cliente) <span class="text-danger">*</span>
+                            </label>
+
+                            <!-- Campo de busca visível -->
+                            <div class="input-group">
+                                <input type="text" id="txtBuscaCliente" class="form-control"
+                                       style="border-radius: 6px 0 0 6px; border-color: var(--zinc-300);"
+                                       placeholder="Digite o nome, CPF ou telefone..." autocomplete="off">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-outline-secondary"
+                                            style="border-radius: 0;" onclick="limparClienteSelecionado()"
+                                            title="Limpar">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button type="button" class="btn text-white font-weight-bold"
+                                            style="background-color: var(--emerald-500); border-radius: 0 6px 6px 0;"
+                                            onclick="abrirModalNovoClienteVeiculo()" title="Cadastrar novo cliente">
+                                        <i class="fas fa-user-plus mr-1"></i> Novo
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Dropdown de resultados -->
+                            <div id="dropdownClientes" class="list-group shadow-sm"
+                                 style="display:none; position:absolute; z-index:9999; width:calc(100% - 30px); max-height:220px; overflow-y:auto; border-radius:0 0 8px 8px;">
+                            </div>
+
+                            <!-- Campo oculto que guarda o ID real do cliente selecionado -->
+                            <input type="hidden" id="hdnClienteId" required>
+
+                            <!-- Badge do cliente selecionado -->
+                            <div id="clienteSelecionadoBadge" class="mt-2" style="display:none;">
+                                <span class="badge px-3 py-2"
+                                      style="background:#f0fdf4; color:#16a34a; border:1px solid #bbf7d0; border-radius:20px; font-size:0.88rem;">
+                                    <i class="fas fa-user-check mr-1"></i>
+                                    <span id="clienteSelecionadoNome"></span>
+                                </span>
+                            </div>
                         </div>
                     </div>
+
 
                     <div class="row">
                         <div class="col-md-3 form-group">
@@ -112,6 +148,101 @@
         </div>
     </div>
 </div>
+
+<!-- Modal Rápido de Cadastro de Cliente (acionado dentro do modal de veículo) -->
+<div class="modal fade" id="modalClienteRapido" tabindex="-1" aria-hidden="true" data-backdrop="static" style="z-index: 1060;">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+
+            <div class="modal-header d-flex justify-content-between align-items-center" style="background-color: var(--zinc-900); color: var(--zinc-50);">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-user-plus mr-2 text-emerald-500"></i> Cadastrar Novo Cliente
+                </h5>
+                <button type="button" class="close text-white" onclick="fecharModalClienteRapido()">&times;</button>
+            </div>
+
+            <form id="formClienteRapido">
+                <div class="modal-body" style="background-color: var(--zinc-50); padding: 1.5rem;">
+                    <input type="hidden" id="txtIdCR" />
+
+                    <div class="glass-card p-3 mb-4 shadow-sm" style="border-radius: 8px;">
+                        <h6 class="font-weight-bold text-uppercase mb-3" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">Dados Principais</h6>
+                        <div class="row">
+                            <div class="col-md-8 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Nome Completo / Razão Social <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtNomeCR" required placeholder="Ex: João da Silva">
+                            </div>
+                            <div class="col-md-4 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">CPF / CNPJ</label>
+                                <input type="text" class="form-control font-weight-bold text-primary" style="border-radius: 6px;" id="txtCpfCnpjCR" placeholder="000.000.000-00">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-3 mb-4 shadow-sm" style="border-radius: 8px;">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                            <h6 class="font-weight-bold text-uppercase m-0" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">Meios de Contato</h6>
+                            <button type="button" class="btn btn-sm text-white font-weight-bold shadow-sm" style="background-color: var(--emerald-500); border-radius: 6px;" onclick="adicionarLinhaContatoCR()">
+                                <i class="fas fa-plus mr-1"></i> Adicionar Mais
+                            </button>
+                        </div>
+                        <div class="row font-weight-bold pb-2 mb-2 text-muted" style="font-size: 0.8rem;">
+                            <div class="col-md-3">Telefone/Celular</div>
+                            <div class="col-md-4">E-mail</div>
+                            <div class="col-md-4">Observação</div>
+                        </div>
+                        <div id="boxContatosCR"></div>
+                    </div>
+
+                    <div class="glass-card p-3 shadow-sm" style="border-radius: 8px;">
+                        <h6 class="font-weight-bold text-uppercase mb-3" style="color: var(--zinc-500); font-size: 0.8rem; letter-spacing: 1px;">Endereço</h6>
+                        <div class="row">
+                            <div class="col-md-3 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">CEP</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" style="border-radius: 6px 0 0 6px;" id="txtCepCR" placeholder="00000-000">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-secondary" type="button" style="border-radius: 0 6px 6px 0;" onclick="buscarCepCR()"><i class="fas fa-search"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Logradouro</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtLogradouroCR">
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Número</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtNumeroCR">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Bairro</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtBairroCR">
+                            </div>
+                            <div class="col-md-5 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">Cidade</label>
+                                <input type="text" class="form-control" style="border-radius: 6px;" id="txtCidadeCR">
+                            </div>
+                            <div class="col-md-2 form-group mb-0">
+                                <label class="font-weight-bold" style="color: var(--zinc-700); font-size: 0.85rem;">UF</label>
+                                <input type="text" class="form-control" style="border-radius: 6px; text-transform: uppercase;" id="txtUfCR" maxlength="2">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer" style="background-color: var(--zinc-100); border-top: 1px solid var(--zinc-200);">
+                    <button type="button" class="btn btn-outline-secondary font-weight-bold" onclick="fecharModalClienteRapido()" style="border-radius: 6px;">Cancelar</button>
+                    <button type="submit" class="btn text-white font-weight-bold px-4" id="btnSalvarCR" style="background-color: var(--emerald-500); border-radius: 6px;">
+                        <i class="fas fa-save mr-1"></i> Salvar e Selecionar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
