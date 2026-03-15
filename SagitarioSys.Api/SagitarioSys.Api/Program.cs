@@ -37,6 +37,7 @@ builder.Services.AddScoped<FinanceiroRepository>();
 builder.Services.AddScoped<CategoriaFinanceiraRepository>();
 builder.Services.AddScoped<ProntuarioRepository>();
 builder.Services.AddScoped<RelatoriosRepository>();
+builder.Services.AddScoped<FornecedorRepository>();
 
 builder.Services.AddControllers();
 

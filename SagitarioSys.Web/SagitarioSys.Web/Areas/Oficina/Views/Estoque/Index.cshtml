@@ -6,9 +6,17 @@
         <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900); font-size: 1.75rem; letter-spacing: -0.5px;">Estoque</h2>
         <p class="text-muted m-0" style="font-size: 0.95rem;">Controle inteligente de peças e insumos.</p>
     </div>
-    <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
-        <i class="fas fa-plus mr-2"></i> Entrada de Peça
-    </button>
+    <div class="d-flex">
+        <button class="btn btn-outline-secondary font-weight-bold px-3 py-2 mr-2 d-flex align-items-center" style="border-radius: 8px;" onclick="abrirModalAjuste()">
+            <i class="fas fa-clipboard-check mr-2"></i> Acerto de Estoque
+        </button>
+        <a class="btn btn-outline-secondary font-weight-bold px-3 py-2 mr-2 d-flex align-items-center" style="border-radius: 8px;" href="/Oficina/Fornecedores">
+            <i class="fas fa-truck mr-2"></i> Fornecedores
+        </a>
+        <button class="btn font-weight-bold px-3 py-2 shadow-sm d-flex align-items-center" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModal()">
+            <i class="fas fa-plus mr-2"></i> Cadastrar Produto
+        </button>
+    </div>
 </div>
 
 <div class="row mb-4">
@@ -42,20 +50,26 @@
         <table class="table table-borderless table-hover align-middle m-0" id="tbEstoque">
             <thead style="border-bottom: 2px solid var(--zinc-100);">
                 <tr style="color: var(--zinc-400); font-size: 0.75rem; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
-                    <th class="pl-4 py-3">Peça / SKU</th>
+                    <th class="pl-4 py-3">Produto</th>
+                    <th class="py-3">Código</th>
                     <th class="py-3">Quantidade</th>
                     <th class="py-3">Custo</th>
                     <th class="py-3">Venda</th>
                     <th class="py-3">Margem</th>
                     <th class="py-3 text-center">Status</th>
-                    <th class="py-3 text-center" width="80"></th>
+                    <th class="py-3 text-center" width="70"></th>
                 </tr>
             </thead>
             <tbody style="color: var(--zinc-800); font-size: 0.9rem;">
-                <tr><td colspan="7" class="text-center py-5"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando estoque...</td></tr>
+                <tr><td colspan="8" class="text-center py-5"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando estoque...</td></tr>
             </tbody>
         </table>
     </div>
+</div>
+
+<div class="alert alert-light border d-flex align-items-center mb-4" role="alert" style="border-radius: 10px;">
+    <i class="fas fa-shield-alt text-primary mr-2"></i>
+    <span class="small mb-0"><strong>Proteção de histórico:</strong> produtos não podem ser excluídos. Caso necessário, use <strong>Acerto de Estoque</strong> para corrigir saldo físico.</span>
 </div>
 
 <div class="modal fade" id="modalPeca" tabindex="-1" aria-hidden="true" data-backdrop="static">
@@ -76,15 +90,30 @@
                             <input type="text" class="form-control" style="border-radius: 6px;" id="txtNome" required placeholder="Ex: Correia Dentada">
                         </div>
                         <div class="col-md-4 form-group">
-                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Código (SKU)</label>
-                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtSku" placeholder="Ex: 145465">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Código do Produto (SKU) <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtSku" required placeholder="Ex: PRD-145465">
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-12 form-group">
+                        <div class="col-md-8 form-group">
+                            <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Buscar produto já cadastrado</label>
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtBuscaProdutoCadastro" placeholder="Digite nome ou SKU para localizar" list="listaProdutosExistentes">
+                            <datalist id="listaProdutosExistentes"></datalist>
+                        </div>
+                        <div class="col-md-4 form-group d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-info w-100" onclick="aplicarProdutoExistente()"><i class="fas fa-search mr-2"></i>Usar produto existente</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-9 form-group">
                             <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Fornecedor / Local de Compra</label>
-                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtFornecedor" placeholder="Ex: Mercado Livre, Distribuidora XYZ...">
+                            <input type="text" class="form-control" style="border-radius: 6px;" id="txtFornecedor" list="listaFornecedores" placeholder="Busque por um fornecedor cadastrado">
+                            <datalist id="listaFornecedores"></datalist>
+                        </div>
+                        <div class="col-md-3 form-group d-flex align-items-end">
+                            <a href="/Oficina/Fornecedores" class="btn btn-outline-secondary w-100"><i class="fas fa-plus mr-2"></i>Novo fornecedor</a>
                         </div>
                     </div>
 
@@ -112,6 +141,45 @@
                     <button type="submit" class="btn text-white font-weight-bold px-4" id="btnSalvar" style="background-color: var(--emerald-500); border-radius: 6px;">
                         Salvar Peça
                     </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAjuste" tabindex="-1" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header d-flex justify-content-between align-items-center" style="background-color: var(--zinc-900); color: var(--zinc-50);">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-clipboard-check mr-2"></i> Acerto de Estoque</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <form id="formAjuste">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Produto <span class="text-danger">*</span></label>
+                        <select class="form-control" id="selPecaAjuste" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Tipo de Acerto</label>
+                        <select class="form-control" id="selTipoAjuste">
+                            <option value="entrada">Entrada (+)</option>
+                            <option value="saida">Saída (-)</option>
+                            <option value="inventario">Ajustar para saldo exato</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Quantidade <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="txtQtdAjuste" min="0.01" step="0.01" required>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label class="font-weight-bold text-muted" style="font-size: 0.85rem;">Observação do acerto</label>
+                        <textarea class="form-control" id="txtObsAjuste" rows="2" placeholder="Ex: contagem física, perda, compra emergencial..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer" style="background-color: var(--zinc-50); border-top: 1px solid var(--zinc-200);">
+                    <button type="button" class="btn btn-outline-secondary font-weight-bold" data-dismiss="modal" style="border-radius: 6px;">Cancelar</button>
+                    <button type="submit" class="btn text-white font-weight-bold px-4" id="btnSalvarAjuste" style="background-color: var(--emerald-500); border-radius: 6px;">Aplicar Ajuste</button>
                 </div>
             </form>
         </div>

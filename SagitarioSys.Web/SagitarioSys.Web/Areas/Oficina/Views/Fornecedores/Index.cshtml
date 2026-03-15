@@ -1,0 +1,79 @@
+﻿<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <div>
+        <h2 class="m-0 font-weight-bold" style="color: var(--zinc-900);">Fornecedores</h2>
+        <p class="text-muted m-0">Cadastro completo de parceiros de compra.</p>
+    </div>
+    <button class="btn font-weight-bold px-3 py-2 shadow-sm" style="background-color: var(--zinc-900); color: white; border-radius: 8px;" onclick="abrirModalFornecedor()">
+        <i class="fas fa-plus mr-2"></i> Novo Fornecedor
+    </button>
+</div>
+
+<div class="glass-card p-0 overflow-hidden mb-4">
+    <div class="p-3 border-bottom d-flex align-items-center bg-white">
+        <i class="fas fa-search text-muted mr-3 pl-2"></i>
+        <input type="text" id="txtBuscaFornecedor" class="form-control border-0 shadow-none p-0" placeholder="Buscar por nome, razão social ou documento..." style="font-size: 0.95rem; background: transparent;">
+    </div>
+    <div class="table-responsive">
+        <table class="table table-borderless table-hover align-middle m-0" id="tbFornecedores">
+            <thead>
+                <tr>
+                    <th class="pl-4 py-3">Nome</th>
+                    <th class="py-3">Documento</th>
+                    <th class="py-3">Contato</th>
+                    <th class="py-3">Cidade/UF</th>
+                    <th class="py-3">Status</th>
+                    <th class="py-3 text-center" width="70"></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="6" class="text-center py-5"><i class="fas fa-spinner fa-spin mr-2"></i> Carregando fornecedores...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalFornecedor" tabindex="-1" aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background-color: var(--zinc-900); color: #fff;">
+                <h5 class="modal-title font-weight-bold">Cadastro de Fornecedor</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <form id="formFornecedor">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="txtFornecedorId" />
+                    <div class="row">
+                        <div class="col-md-4 form-group"><label>Nome Fantasia *</label><input id="txtNomeFantasia" class="form-control" required></div>
+                        <div class="col-md-4 form-group"><label>Razão Social</label><input id="txtRazaoSocial" class="form-control"></div>
+                        <div class="col-md-4 form-group"><label>CNPJ/CPF *</label><input id="txtDocumento" class="form-control" required></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group"><label>E-mail</label><input id="txtEmailFornecedor" type="email" class="form-control"></div>
+                        <div class="col-md-3 form-group"><label>Telefone</label><input id="txtTelefoneFornecedor" class="form-control"></div>
+                        <div class="col-md-3 form-group"><label>WhatsApp</label><input id="txtWhatsappFornecedor" class="form-control"></div>
+                        <div class="col-md-2 form-group d-flex align-items-end"><div class="custom-control custom-switch"><input type="checkbox" class="custom-control-input" id="chkFornecedorAtivo" checked><label class="custom-control-label" for="chkFornecedorAtivo">Ativo</label></div></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 form-group"><label>CEP</label><input id="txtCepFornecedor" class="form-control"></div>
+                        <div class="col-md-5 form-group"><label>Logradouro</label><input id="txtLogradouroFornecedor" class="form-control"></div>
+                        <div class="col-md-2 form-group"><label>Número</label><input id="txtNumeroFornecedor" class="form-control"></div>
+                        <div class="col-md-3 form-group"><label>Bairro</label><input id="txtBairroFornecedor" class="form-control"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 form-group"><label>Cidade</label><input id="txtCidadeFornecedor" class="form-control"></div>
+                        <div class="col-md-2 form-group"><label>UF</label><input id="txtEstadoFornecedor" class="form-control" maxlength="2"></div>
+                        <div class="col-md-6 form-group"><label>Observações</label><textarea id="txtObsFornecedor" rows="2" class="form-control"></textarea></div>
+                    </div>
+                </div>
+                <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancelar</button><button type="submit" class="btn btn-success" id="btnSalvarFornecedor">Salvar Fornecedor</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/Oficina/fornecedores.js"></script>
+}

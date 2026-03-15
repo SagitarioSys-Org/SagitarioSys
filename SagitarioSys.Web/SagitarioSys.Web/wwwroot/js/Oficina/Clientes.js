@@ -63,20 +63,27 @@ var telBehavior = function (val) {
 function adicionarLinhaContato(tel = "", email = "", obs = "") {
     var idLinha = 'contato_' + Math.random().toString(36).substr(2, 9);
 
-    // Novo HTML com campos arredondados e botão lixeira limpo
+    // Formata o telefone para exibição se vier do banco (só números)
+    var telFormatado = formatarTelExibicao(tel);
+
     var html = `
         <div class="row mb-2 align-items-center linha-contato" id="${idLinha}">
             <div class="col-md-3">
-                <input type="text" class="form-control form-control-sm txt-tel" placeholder="Telefone/Celular" value="${tel}" style="border-radius: 6px;">
+                <input type="text" class="form-control form-control-sm txt-tel" 
+                       placeholder="(00) 00000-0000" value="${telFormatado}" 
+                       style="border-radius: 6px;" maxlength="15">
             </div>
             <div class="col-md-4">
-                <input type="email" class="form-control form-control-sm txt-email" placeholder="E-mail" value="${email}" style="border-radius: 6px;">
+                <input type="email" class="form-control form-control-sm txt-email" 
+                       placeholder="E-mail" value="${email}" style="border-radius: 6px;">
             </div>
             <div class="col-md-4">
-                <input type="text" class="form-control form-control-sm txt-obs" placeholder="Ex: Falar com a esposa" value="${obs}" style="border-radius: 6px;">
+                <input type="text" class="form-control form-control-sm txt-obs" 
+                       placeholder="Ex: Falar com a esposa" value="${obs}" style="border-radius: 6px;">
             </div>
             <div class="col-md-1 text-center">
-                <button type="button" class="btn btn-sm btn-outline-danger border-0 shadow-none" onclick="$('#${idLinha}').remove()" title="Remover Contato">
+                <button type="button" class="btn btn-sm btn-outline-danger border-0 shadow-none" 
+                        onclick="$('#${idLinha}').remove()" title="Remover">
                     <i class="fas fa-trash"></i>
                 </button>
             </div>
@@ -85,7 +92,20 @@ function adicionarLinhaContato(tel = "", email = "", obs = "") {
 
     $("#boxContatos").append(html);
 
+    // Aplica máscara após inserir no DOM
     $(`#${idLinha} .txt-tel`).mask(telBehavior, telOptions);
+}
+
+// Formata número limpo do banco para exibição: "11999998888" → "(11) 99999-8888"
+function formatarTelExibicao(tel) {
+    if (!tel) return "";
+    var limpo = tel.replace(/\D/g, '');
+    if (limpo.length === 11) {
+        return limpo.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
+    } else if (limpo.length === 10) {
+        return limpo.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
+    }
+    return tel; // retorna como veio se não bater o tamanho
 }
 
 function removerLinha(botao) {
@@ -169,7 +189,7 @@ function salvar() {
         numero: $("#txtNumero").val(),
         bairro: $("#txtBairro").val(),
         cidade: $("#txtCidade").val(),
-        uf: $("#txtUf").val(), // CORREÇÃO: Era txtEstado
+        estado: $("#txtUf").val(), // CORREÇÃO: Era txtEstado
         contatos: listaContatos
     };
 
