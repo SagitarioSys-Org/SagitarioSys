@@ -1,5 +1,5 @@
 ﻿$(document).ready(function () {
-    carregarSegmentos(); // Busca "Oficina, Loja de Roupas" direto do banco
+    carregarSegmentos();
     carregarAssinantes();
 
     $("#formAssinante").on("submit", function (e) {
@@ -13,9 +13,32 @@
     });
 });
 
-// ==========================================
-// PREENCHIMENTO E LISTAGEM
-// ==========================================
+function montarUrlLogo(caminhoLogo) {
+    if (!caminhoLogo || caminhoLogo.trim() === "") return "";
+    return _url.replace(/\/$/, "") + caminhoLogo;
+}
+
+function resetarEstadoLogo() {
+    $("#inputLogo").val("");
+    $("#btnEnviarLogo").hide();
+    $("#previewLogo").hide().attr("src", "");
+    $("#boxSemLogo").show();
+}
+
+function exibirLogo(caminhoLogo) {
+    const logoUrl = montarUrlLogo(caminhoLogo);
+
+    if (logoUrl) {
+        $("#previewLogo")
+            .attr("src", logoUrl + "?t=" + Date.now())
+            .show();
+        $("#boxSemLogo").hide();
+    } else {
+        $("#previewLogo").hide().attr("src", "");
+        $("#boxSemLogo").show();
+    }
+}
+
 function carregarSegmentos() {
     $.ajax({
         url: _url + "api/Admin/Segmentos/ativos",
@@ -35,7 +58,6 @@ function carregarAssinantes() {
         url: _url + "api/Admin/Assinantes",
         type: "GET",
         success: function (dados) {
-            // Destrói a tabela velha para recriar
             if ($.fn.DataTable.isDataTable('#tabelaAssinantes')) {
                 $('#tabelaAssinantes').DataTable().destroy();
             }
@@ -45,19 +67,15 @@ function carregarAssinantes() {
                 html = '<tr><td colspan="6" class="text-center py-4">Nenhuma empresa cadastrada.</td></tr>';
             } else {
                 dados.forEach(function (empresa) {
-                    // Lógica visual do Status
                     var statusBadge = empresa.ativo
                         ? '<span class="badge badge-success px-2 py-1"><i class="fas fa-check-circle mr-1"></i> Ativo</span>'
                         : '<span class="badge badge-danger px-2 py-1"><i class="fas fa-lock mr-1"></i> Bloqueado</span>';
 
-                    // Lógica do Botão de Bloquear/Desbloquear
                     var btnBloqueio = empresa.ativo
                         ? `<button class="btn btn-sm btn-outline-danger shadow-sm" onclick="alternarStatus('${empresa.id}', '${empresa.nomeFantasia}', true)" title="Bloquear Sistema"><i class="fas fa-ban"></i></button>`
                         : `<button class="btn btn-sm btn-outline-success shadow-sm" onclick="alternarStatus('${empresa.id}', '${empresa.nomeFantasia}', false)" title="Desbloquear Sistema"><i class="fas fa-unlock"></i></button>`;
 
                     var btnSenha = `<button class="btn btn-sm btn-warning shadow-sm mr-1" onclick="abrirModalSenha('${empresa.id}', '${empresa.nomeFantasia}')" title="Resetar Senha"><i class="fas fa-key text-dark"></i></button>`;
-
-                    // Linha com estilo cinza se estiver bloqueada
                     var linhaClass = empresa.ativo ? "" : "text-muted bg-light";
 
                     html += `
@@ -65,10 +83,10 @@ function carregarAssinantes() {
                             <td class="align-middle font-weight-bold">${empresa.nomeFantasia}</td>
                             <td class="align-middle">${empresa.cnpjCpf}</td>
                             <td class="align-middle text-primary font-weight-bold">${empresa.emailAdmin || '-'}</td>
-                            <td class="align-middle">${empresa.nomeSegmento}</td> 
+                            <td class="align-middle">${empresa.nomeSegmento}</td>
                             <td class="text-center align-middle">${statusBadge}</td>
                             <td class="text-center align-middle">
-                                ${btnSenha} 
+                                ${btnSenha}
                                 <button class="btn btn-sm btn-primary shadow-sm mr-1" onclick="editar('${empresa.id}')" title="Editar"><i class="fas fa-pen"></i></button>
                                 ${btnBloqueio}
                             </td>
@@ -79,29 +97,30 @@ function carregarAssinantes() {
 
             $("#tabelaAssinantes tbody").html(html);
 
-            // Inicia o DataTables
             if (dados.length > 0) {
                 $('#tabelaAssinantes').DataTable({
-                    "language": { "url": "https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json" },
-                    "ordering": true,
-                    "info": true,
-                    "autoWidth": false,
-                    "responsive": true
+                    language: { url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json" },
+                    ordering: true,
+                    info: true,
+                    autoWidth: false,
+                    responsive: true
                 });
             }
         }
     });
 }
 
-// ==========================================
-// CRUD (CRIAR E EDITAR) - ATUALIZADO COM NOVOS CAMPOS
-// ==========================================
 function abrirModalNovo() {
     $("#txtEmpresaId").val("");
     $("#formAssinante")[0].reset();
     $("#modalTitle").html('<i class="fas fa-building mr-2"></i> Novo Assinante');
     $("#areaUsuarioAdmin").show();
     $("#txtEmailAdmin, #txtSenhaAdmin, #txtNomeAdmin").prop("required", true);
+
+    resetarEstadoLogo();
+    $("#areaUploadLogo").hide();
+    $("#msgSemLogo").show();
+
     $("#modalAssinante").modal("show");
 }
 
@@ -111,7 +130,6 @@ function salvarAssinante() {
     var metodo = isEdicao ? "PUT" : "POST";
     var url = isEdicao ? `${_url}api/Admin/Assinantes/${id}` : _url + "api/Admin/Assinantes";
 
-    // Puxamos os dados comuns a ambos (Novo e Edição)
     var dados = {
         nomeFantasia: $("#txtNomeFantasia").val(),
         razaoSocial: $("#txtRazaoSocial").val(),
@@ -128,15 +146,11 @@ function salvarAssinante() {
     };
 
     if (isEdicao) {
-        // Se for EDIÇÃO, o C# (Empresa.cs) exige os nomes curtos
         dados.telefone = $("#txtTelefoneEmpresa").val();
         dados.emailContato = $("#txtEmailEmpresa").val();
     } else {
-        // Se for NOVO, o C# (NovoAssinanteRequest.cs) exige os nomes compridos
         dados.telefoneEmpresa = $("#txtTelefoneEmpresa").val();
         dados.emailContatoEmpresa = $("#txtEmailEmpresa").val();
-
-        // E também manda os dados do gestor (Primeiro Acesso)
         dados.nomeAdmin = $("#txtNomeAdmin").val();
         dados.cpfAdmin = $("#txtCpfAdmin").val();
         dados.telefoneAdmin = $("#txtTelAdmin").val();
@@ -170,13 +184,18 @@ function salvarAssinante() {
 
 function editar(id) {
     $("#formAssinante")[0].reset();
+    resetarEstadoLogo();
+
     $.ajax({
         url: `${_url}api/Admin/Assinantes/${id}`,
         type: "GET",
         success: function (empresa) {
             $("#txtEmpresaId").val(empresa.id);
 
-            // Preenche os dados da empresa
+            exibirLogo(empresa.logomarca);
+            $("#areaUploadLogo").show();
+            $("#msgSemLogo").hide();
+
             $("#txtNomeFantasia").val(empresa.nomeFantasia);
             $("#txtRazaoSocial").val(empresa.razaoSocial);
             $("#txtCnpj").val(empresa.cnpjCpf);
@@ -184,8 +203,6 @@ function editar(id) {
             $("#ddlSegmento").val(empresa.segmentoId);
             $("#txtTelefoneEmpresa").val(empresa.telefone);
             $("#txtEmailEmpresa").val(empresa.emailContato);
-
-            // Preenche o endereço
             $("#txtCep").val(empresa.cep);
             $("#txtLogradouro").val(empresa.logradouro);
             $("#txtNumero").val(empresa.numero);
@@ -195,8 +212,6 @@ function editar(id) {
             $("#ddlUf").val(empresa.uf);
 
             $("#modalTitle").html('<i class="fas fa-edit mr-2"></i> Editar Empresa');
-
-            // Esconde os dados do Admin na edição
             $("#areaUsuarioAdmin").hide();
             $("#txtEmailAdmin, #txtSenhaAdmin, #txtNomeAdmin").prop("required", false);
 
@@ -205,9 +220,6 @@ function editar(id) {
     });
 }
 
-// ==========================================
-// LÓGICA DE BLOQUEIO E SENHA
-// ==========================================
 function alternarStatus(id, nome, estaAtivo) {
     var acao = estaAtivo ? "Bloquear" : "Desbloquear";
     var corBotao = estaAtivo ? "#d33" : "#28a745";
@@ -286,9 +298,6 @@ function salvarNovaSenha() {
     });
 }
 
-// ==========================================
-// INTEGRAÇÃO VIACEP (NOVO)
-// ==========================================
 function buscarCep() {
     var cep = $("#txtCep").val().replace(/\D/g, '');
     if (cep.length === 8) {
@@ -306,4 +315,84 @@ function buscarCep() {
             }
         });
     }
+}
+
+function preVisualizarLogo(input) {
+    if (input.files && input.files[0]) {
+        var arquivo = input.files[0];
+        var tiposPermitidos = ["image/png", "image/jpeg", "image/webp"];
+
+        if (!tiposPermitidos.includes(arquivo.type)) {
+            Swal.fire('Atenção!', 'Selecione uma imagem PNG, JPG, JPEG ou WEBP.', 'warning');
+            $("#inputLogo").val("");
+            $("#btnEnviarLogo").hide();
+            return;
+        }
+
+        if (arquivo.size > 2 * 1024 * 1024) {
+            Swal.fire('Atenção!', 'A logo deve ter no máximo 2 MB.', 'warning');
+            $("#inputLogo").val("");
+            $("#btnEnviarLogo").hide();
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $("#previewLogo").attr("src", e.target.result).show();
+            $("#boxSemLogo").hide();
+            $("#btnEnviarLogo").show();
+        };
+        reader.readAsDataURL(arquivo);
+    }
+}
+
+function enviarLogo() {
+    var id = $("#txtEmpresaId").val();
+    var arquivo = $("#inputLogo")[0].files[0];
+
+    if (!id) {
+        Swal.fire('Atenção!', 'Salve a empresa antes de enviar a logo.', 'warning');
+        return;
+    }
+
+    if (!arquivo) {
+        Swal.fire('Atenção!', 'Selecione uma imagem antes de enviar.', 'warning');
+        return;
+    }
+
+    var formData = new FormData();
+    formData.append("arquivo", arquivo);
+
+    $("#btnEnviarLogo")
+        .prop("disabled", true)
+        .html('<i class="fas fa-spinner fa-spin mr-1"></i> Enviando...');
+
+    $.ajax({
+        url: `${_url}api/Admin/Assinantes/${id}/logo`,
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (resp) {
+            exibirLogo(resp.url);
+            $("#inputLogo").val("");
+            $("#btnEnviarLogo").hide();
+
+            Swal.fire({
+                title: 'Logo salva!',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        },
+        error: function (xhr) {
+            const msg = xhr.responseJSON?.message || "Erro ao enviar logo.";
+            Swal.fire('Erro!', msg, 'error');
+        },
+        complete: function () {
+            $("#btnEnviarLogo")
+                .prop("disabled", false)
+                .html('<i class="fas fa-check mr-1"></i> Salvar Logo');
+        }
+    });
 }

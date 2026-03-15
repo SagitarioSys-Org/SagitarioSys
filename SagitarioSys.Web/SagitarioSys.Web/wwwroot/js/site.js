@@ -45,11 +45,28 @@ $(document).ready(function () {
     }
 
     // 2. PREENCHER DADOS DO USUÁRIO NA SIDEBAR
-    const userName = localStorage.getItem("user_nome") || "Usuário";
+    const userName = localStorage.getItem("user_empresa") || "Usuário";
     const userTipo = localStorage.getItem("user_tipo") || "Convidado";
 
+    // Sempre define o texto (mesmo que fique oculto)
     $("#lblNomeUsuario").text(userName);
-    $("#lblTipoEmpresa").text(userTipo.toUpperCase());
+    $("#lblTipoEmpresa").text(userTipo.toUpperCase()); 
+
+    var TemLogo = localStorage.getItem("empresa_logo");
+
+    var UrlSemBarraNoFinal =  _url.slice(0, -1);
+
+    var logo = UrlSemBarraNoFinal + localStorage.getItem("empresa_logo");  
+
+    if (TemLogo && TemLogo.trim() !== "") {
+        $("#imgLogoSidebar").attr("src", logo).show();
+        $("#lblNomeUsuario").hide();
+        $("#lblTipoEmpresa").hide();
+    } else {
+        $("#imgLogoSidebar").hide();
+        $("#lblNomeUsuario").show();
+        $("#lblTipoEmpresa").show();
+    } 
 
     // 3. CONSTRUÇÃO DINÂMICA DO MENU
     renderizarMenuDinamico(userTipo);

@@ -21,7 +21,20 @@
 });
 
 function montarRelatorio(data, dtInicio, dtFim) {
-    const nomeEmpresa = localStorage.getItem("user_nome") || "SagitarioSys";
+    const nomeEmpresa = localStorage.getItem("user_empresa") || "SagitarioSys";
+
+    var UrlSemBarraNoFinal = _url.slice(0, -1);
+    var logo = UrlSemBarraNoFinal + localStorage.getItem("empresa_logo");  
+
+    var EmpresaNomeLogo = "";
+
+    if (logo) {
+        EmpresaNomeLogo = `<img id="imgLogoRel" src="${logo}" style="max-height: 120px; object-fit: contain;">`;
+    }
+    else {
+        EmpresaNomeLogo = `<h3 class="font-weight-bold mb-0">${nomeEmpresa}</h3>`;
+    }
+
     const dataGeracao = new Date().toLocaleString('pt-BR');
     const periodo = `${new Date(dtInicio + 'T00:00:00').toLocaleDateString('pt-BR')} até ${new Date(dtFim + 'T00:00:00').toLocaleDateString('pt-BR')}`;
 
@@ -48,7 +61,7 @@ function montarRelatorio(data, dtInicio, dtFim) {
     $("#conteudoFolha").html(`
         <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-4">
             <div>
-                <h3 class="font-weight-bold mb-0">${nomeEmpresa}</h3>
+                ${EmpresaNomeLogo}
                 <p class="text-muted mb-0">Demonstrativo de Lucro Real</p>
                 <small class="text-muted">Período: <strong>${periodo}</strong></small>
             </div>

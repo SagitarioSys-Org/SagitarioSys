@@ -113,6 +113,9 @@ function salvar() {
         precoVenda: parseFloat($("#txtVenda").val()) || 0
     };
 
+    if (isEdicao)
+        dados.id = id;
+
     var $btn = $("#btnSalvar");
     $btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...');
 

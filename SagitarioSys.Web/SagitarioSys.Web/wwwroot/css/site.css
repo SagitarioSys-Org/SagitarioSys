@@ -217,3 +217,9 @@ body.sidebar-collapse .sidebar-footer .avatar-box {
 .sidebar-mini.sidebar-collapse .user-panel .info {
     display: none !important;
 }
+
+
+.user-panel img {
+    height: auto !important;
+    width: 6.1rem !important;
+}

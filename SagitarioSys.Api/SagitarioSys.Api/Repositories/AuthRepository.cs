@@ -9,6 +9,7 @@ namespace SagitarioSys.Api.Repositories
         public string TipoNegocio { get; set; } = string.Empty;
         public string NomeFantasia { get; set; } = string.Empty;
         public string RotaDashboard { get; set; } = string.Empty;
+        public string? Logomarca { get; set; }
     }
 
     public class AuthRepository
@@ -30,7 +31,8 @@ namespace SagitarioSys.Api.Repositories
                     u.*, 
                     s.Nome AS TipoNegocio, -- Pega o nome dinâmico (Oficina, SaaS, etc)
                     e.NomeFantasia,
-                    s.RotaDashboard
+                    s.RotaDashboard,
+                    e.Logomarca
                 FROM Usuarios u
                 INNER JOIN Empresas e ON u.EmpresaId = e.Id
                 INNER JOIN Segmentos s ON e.SegmentoId = s.Id

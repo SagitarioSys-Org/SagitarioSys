@@ -16,6 +16,7 @@
     <Folder Include="Areas\Clinica\Controllers\" />
     <Folder Include="Areas\PetShop\Controllers\" />
     <Folder Include="wwwroot\css\Admin\" />
+    <Folder Include="wwwroot\logos\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -66,7 +66,8 @@ namespace SagitarioSys.Api.Controllers
                 Usuario = usuario.Nome,
                 Empresa = usuario.NomeFantasia,
                 Tipo = usuario.TipoNegocio,
-                RotaDashboard = usuario.RotaDashboard
+                RotaDashboard = usuario.RotaDashboard,
+                Logomarca = usuario.Logomarca
             });
         }
 
